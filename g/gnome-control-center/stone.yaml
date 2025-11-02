@@ -4,11 +4,11 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : gnome-control-center
-version     : 48.0
-release     : 18
+version     : "49.1"
+release     : 27
 homepage    : https://apps.gnome.org/Settings/
 upstreams   :
-    - https://download.gnome.org/sources/gnome-control-center/48/gnome-control-center-48.0.tar.xz : 1652202db36a2be7441019b9daff3574e80428598e82395a87418015a8c06624
+    - https://download.gnome.org/sources/gnome-control-center/49/gnome-control-center-49.1.tar.xz : 5402eff8f23163a755dec249366c1b3a65e80f0da60f0774a740d1e58746f869
 summary     : Utility to configure the GNOME desktop
 description : |
     Settings is the primary interface for configuring your system.
@@ -16,6 +16,7 @@ license     :
     - GPL-2.0-or-later
     - JSON
 builddeps   :
+    - binary(blueprint-compiler)
     - binary(msgfmt)
     - binary(setxkbmap)
     - pkgconfig(accountsservice)
@@ -31,7 +32,6 @@ builddeps   :
     - pkgconfig(gnome-bg-4)
     - pkgconfig(gnome-bluetooth-ui-3.0)
     - pkgconfig(gnome-desktop-4)
-    - pkgconfig(gnome-rr-4)
     - pkgconfig(gnome-settings-daemon)
     - pkgconfig(gnutls)
     - pkgconfig(goa-backend-1.0)
@@ -59,11 +59,12 @@ builddeps   :
     - pkgconfig(udisks2)
     - pkgconfig(upower-glib)
     - pkgconfig(x11)
-    - pkgconfig(xi)
 rundeps     :
     - cups-pk-helper
     - gnome-remote-desktop
     - tecla
+    # Moss upgrade bug
+    - gstreamer-plugins-good
 setup       : |
     %meson -Ddistributor_logo=%(datadir)/icons/aerynos-logo.svg \
            -Ddark_mode_distributor_logo=%(datadir)/icons/aerynos-logo-dark.svg

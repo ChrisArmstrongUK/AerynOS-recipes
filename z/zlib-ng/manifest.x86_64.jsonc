@@ -25,8 +25,7 @@
 			],
 			"name": "zlib-32bit",
 			"provides": [
-				"soname(libz.so.1(386))",
-				"soname(libz.so.1(x86))"
+				"soname(libz.so.1(386))"
 			]
 		},
 		"zlib-32bit-devel": {
@@ -75,7 +74,7 @@
 			],
 			"files": [
 				"/usr/lib/libz-ng.so.2",
-				"/usr/lib/libz-ng.so.2.2.4"
+				"/usr/lib/libz-ng.so.2.2.5"
 			],
 			"name": "zlib-ng",
 			"provides": [
@@ -102,9 +101,18 @@
 				"cmake(zlib-ng)",
 				"pkgconfig(zlib-ng)"
 			]
+		},
+		"zlib-static": {
+			"depends": [
+				"zlib-devel"
+			],
+			"files": [
+				"/usr/lib/libz.a"
+			],
+			"name": "zlib-static"
 		}
 	},
 	"source-name": "zlib-ng",
-	"source-release": "17",
-	"source-version": "2.2.4"
+	"source-release": "20",
+	"source-version": "2.2.5"
 }

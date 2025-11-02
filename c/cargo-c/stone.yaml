@@ -4,14 +4,14 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : cargo-c
-version     : 0.10.7
-release     : 3
+version     : 0.10.16+cargo-0.91.0
+release     : 9
 homepage    : https://github.com/lu-zero/cargo-c
 upstreams   :
-    - https://github.com/lu-zero/cargo-c/archive/refs/tags/v0.10.7.tar.gz : c4532dd2bf23769df5f64649d5b0c037fb2a29467c74d16a54bad3054d9f3f3a
-    - https://github.com/lu-zero/cargo-c/releases/download/v0.10.7/Cargo.lock :
+    - https://github.com/lu-zero/cargo-c/archive/refs/tags/v0.10.16.tar.gz : c0ebb3175393da5b55c3cd83ba1ae9d42d32e2aece6ceff1424239ffb68eb3e3
+    - https://github.com/lu-zero/cargo-c/releases/download/v0.10.16/Cargo.lock :
         unpack: false
-        hash: 7272f41442713ce20c42198fdf9128a77b539ded1649872ab88dc1411db8dee4
+        hash: 5b4201d68d52bd9cbf928d48ae9274131c604fe7b21149841fd07cc78a50b36e
 summary     : Generate C Libraries using Cargo
 description : |
     Generate C Libraries using Cargo

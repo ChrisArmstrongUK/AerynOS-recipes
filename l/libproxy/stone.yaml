@@ -4,21 +4,16 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : libproxy
-version     : 0.5.9
-release     : 4
+version     : 0.5.11
+release     : 8
 homepage    : https://libproxy.github.io/libproxy/
 upstreams   :
-    - https://github.com/libproxy/libproxy/archive/refs/tags/0.5.9.tar.gz : a1976c3ac4affedc17e6d40cf78c9d8eca6751520ea3cbbec1a8850f7ded1565
+    - https://github.com/libproxy/libproxy/archive/refs/tags/0.5.11.tar.gz : b364f4dbbffc5bdf196330cb76b48abcb489f38b1543e67595ca6cb7ec45d265
 summary     : Simplifyed proxy handling
 description : |
     libproxy is a library that provides automatic proxy configuration management.
 license     :
     - LGPL-2.1-or-later
-packages    :
-    - "%(name)":
-        paths:
-            - /usr/lib/libproxy.so*
-            - /usr/lib/libproxy/*
 builddeps   :
     - binary(vapigen)
     - pkgconfig(duktape)
@@ -27,12 +22,27 @@ builddeps   :
     - pkgconfig(gsettings-desktop-schemas)
     - pkgconfig(libcurl)
 setup       : |
-    # Don't force werror thingies please
-    sed -i '/missing-include-dirs/d' meson.build
-    %meson -Ddocs=false
+    %meson \
+        -Dconfig-osx=false \
+        -Dconfig-windows=false \
+        -Ddocs=false
 build       : |
     %meson_build
 install     : |
     %meson_install
-# g-ir-compiler crap
-toolchain   : gnu
+packages    :
+    - "%(name)":
+        paths:
+            - /usr/lib/libproxy.so*
+            - /usr/lib/libproxy/*
+
+    - "%(name)-devel":
+        paths:
+            - /usr/share/vala/vapi/
+
+    - "%(name)-bin":
+        summary: Binary to test %(name)
+        description: Binary to test %(name)
+        paths:
+            - /usr/bin/proxy
+            - /usr/share/man/man8/proxy.8*

@@ -1,0 +1,45 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : kmenuedit
+version     : 6.5.1
+release     : 7
+upstreams   :
+    - https://download.kde.org/stable/plasma/6.5.1/kmenuedit-6.5.1.tar.xz : 6ee0e28e0354787a72029953a32a64c0b6039e00c102b938471178a8db7ccca0
+homepage    : https://kde.org/plasma-desktop/
+license     :
+    - GFDL-1.2-only
+    - GPL-2.0-or-later
+summary     : KDE Plasma menu editor
+description : |
+    KDE Plasma menu editor
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+    - cmake(KF6Crash)
+    - cmake(KF6DBusAddons)
+    - cmake(KF6DocTools)
+    - cmake(KF6GlobalAccel)
+    - cmake(KF6Sonnet)
+    - cmake(KF6I18n)
+    - cmake(KF6IconThemes)
+    - cmake(KF6ItemViews)
+    - cmake(KF6KIO)
+    - cmake(KF6Sonnet)
+    - cmake(KF6WindowSystem)
+    - cmake(KF6XmlGui)
+tuning      :
+    - lto: full
+    - optimize: speed
+setup       : |
+    %cmake_kf6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install
+packages    :
+    - "%(name)-docs":
+        paths:
+            - /usr/share/doc

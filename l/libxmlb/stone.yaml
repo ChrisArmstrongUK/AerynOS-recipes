@@ -4,19 +4,17 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : libxmlb
-version     : 0.3.21
-release     : 3
+version     : 0.3.24
+release     : 8
 homepage    : https://github.com/hughsie/libxmlb
 upstreams   :
-    - https://github.com/hughsie/libxmlb/releases/download/0.3.21/libxmlb-0.3.21.tar.xz : 642343c9b3eca5c234ef83d3d5f6307c78d024f2545f3cc2fa252c9e14e4efd1
+    - https://github.com/hughsie/libxmlb/releases/download/0.3.24/libxmlb-0.3.24.tar.xz : ded52667aac942bb1ff4d1e977e8274a9432d99033d86918feb82ade82b8e001
 summary     : A library to help create and query binary XML blobs
 description : |
     A library to help create and query binary XML blobs
 license     :
     - LGPL-2.1-or-later
-toolchain   : gnu
 builddeps   :
-    - binary(cmake)
     - binary(diff)
     - binary(python3)
     - pkgconfig(gio-2.0)
@@ -36,4 +34,7 @@ install     : |
     rm -fr %(installroot)/usr/share/installed-tests
     rmdir %(installroot)%(libdir)/libxmlb
 check       : |
+    # The dependency ordering for this is slightly broken, and this needs to be built before tests can run
+    meson compile src/libxmlb-mapfile -C %(builddir)
+
     %meson_test

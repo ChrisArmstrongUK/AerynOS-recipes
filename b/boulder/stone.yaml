@@ -1,23 +1,27 @@
 #
 # SPDX-FileCopyrightText: © 2020-2024 Serpent OS Developers
-# SPDX-FileCopyrightText: © 2025 AerynOS Developers
+# SPDX-FileCopyrightText: © 2025- AerynOS Developers
 #
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : boulder
-version     : 0.25.1+git.108fe6d
-release     : 86
+version     : "0.25.6+git.6c3261d"
+release     : 113
 summary     : Modern package building tool
 license     : MPL-2.0
 homepage    : https://github.com/AerynOS/os-tools
 description : |
     Modern package building tool with containerized builds and intelligent package splitting
 upstreams   :
-    - git|https://github.com/AerynOS/os-tools.git : 108fe6dec1a197518401ddd5168fdf83437c5fee
+    - git|https://github.com/AerynOS/os-tools.git :
+        ref : 6c3261d9c9f2f94699e53d3c7826c81b3a70514f
+    - git|https://github.com/spdx/license-list-data.git :
+        ref : d46e94e2c78ceede1cfc63cfa0396472d2798d4c # v3.27.0
 builddeps   :
     - binary(cargo)
 rundeps     :
-    - binary(tar) # needed for `boulder recipe (...)` actions
+    # needed for `boulder recipe (...)` actions
+    - binary(bsdtar)
 networking  : yes
 tuning      :
     - optimize: size
@@ -47,3 +51,7 @@ install     : |
     ./target/*/release/boulder --generate-manpages man/.
     %install_dir %(installroot)%(mandir)/man1
     cp man/*.1 %(installroot)%(mandir)/man1/.
+
+    # SPDX licenses
+    %install_dir %(installroot)%(datadir)/boulder/licenses/
+    cp %(sourcedir)/license-list-data.git/text/* %(installroot)%(datadir)/boulder/licenses/

@@ -4,17 +4,20 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : git
-version     : 2.47.1
-release     : 12
+version     : 2.51.2
+release     : 19
 summary     : Fast, scalable, distributed revision control system
 license     : GPL-2.0-only
 homepage    : https://git-scm.com
 description : |
     Git is a fast, scalable, distributed revision control system with an unusually rich command set that provides both high-level operations and full access to internals.
 upstreams   :
-    - https://www.kernel.org/pub/software/scm/git/git-2.47.1.tar.gz: f4c4e98667800585d218dfdf415eb72f73baa7abcac4569e2ce497970f8d6665
+    - https://www.kernel.org/pub/software/scm/git/git-2.51.2.tar.gz: 9b44c2b337ec838e10aad42439d390963904449710d30c9e7e4ba449f45da98f
 builddeps   :
+    - binary(asciidoc)
     - binary(msgfmt)
+    - binary(tar)
+    - binary(xmlto)
     - pkgconfig(expat)
     - pkgconfig(gobject-2.0)
     - pkgconfig(libcurl)
@@ -23,20 +26,29 @@ builddeps   :
     - pkgconfig(libxcrypt)
     - pkgconfig(openssl)
     - pkgconfig(zlib)
+    - docbook
+environment : |
+    %export_docbook_catalogs
 setup       : |
-    %reconfigure --disable-static \
+    %reconfigure \
+        --disable-static \
         --with-editor=/usr/bin/nano \
         --with-libpcre2 \
         --without-tcltk \
 build       : |
     %make
+    %make man
     %make -C contrib/subtree
     %make -C contrib/credential/libsecret
 install     : |
-    %make_install
+    %make_install install-man
     %make_install -C contrib/subtree
 
     %install_file contrib/completion/git-completion.bash %(installroot)%(datadir)/bash-completion/completions/git
     %install_file contrib/completion/git-completion.zsh %(installroot)%(datadir)/zsh/site-functions/_git
     %install_exe contrib/credential/libsecret/git-credential-libsecret %(installroot)%(libdir)/git/git-core/.
 # TODO Checks
+packages    :
+    - "%(name)":
+        paths:
+            - /usr/share/man/man3/

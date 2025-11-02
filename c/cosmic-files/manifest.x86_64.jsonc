@@ -6,7 +6,10 @@
 			"build-depends": [
 				"binary(just)",
 				"binary(which)",
+				"pkgconfig(bzip2)",
 				"pkgconfig(glib-2.0)",
+				"pkgconfig(liblzma)",
+				"pkgconfig(libzstd)",
 				"pkgconfig(xkbcommon)"
 			],
 			"depends": [
@@ -16,10 +19,10 @@
 				"soname(libgio-2.0.so.0(x86_64))",
 				"soname(libglib-2.0.so.0(x86_64))",
 				"soname(libgobject-2.0.so.0(x86_64))",
-				"soname(liblzma.so.5(x86_64))",
 				"soname(libm.so.6(x86_64))",
 				"soname(libunwind.so.1(x86_64))",
-				"soname(libxkbcommon.so.0(x86_64))"
+				"soname(libxkbcommon.so.0(x86_64))",
+				"soname(libzstd.so.1(x86_64))"
 			],
 			"files": [
 				"/usr/bin/cosmic-files",
@@ -42,6 +45,6 @@
 		}
 	},
 	"source-name": "cosmic-files",
-	"source-release": "14",
-	"source-version": "1.0.0-alpha.6"
+	"source-release": "21",
+	"source-version": "1.0.0-beta3+git.7cc28a9"
 }

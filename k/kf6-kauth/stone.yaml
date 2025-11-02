@@ -4,10 +4,10 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : kf6-kauth
-version     : 6.12.0
-release     : 2
+version     : 6.19.0
+release     : 10
 upstreams   :
-    - https://download.kde.org/stable/frameworks/6.12/kauth-6.12.0.tar.xz : 04cf4f1c2d1ecdeb78cfd986e21d48ab531acbe69420f343207dd66da8ff9d93
+    - https://download.kde.org/stable/frameworks/6.19/kauth-6.19.0.tar.xz : f86363aeb7f9223a429b6356faa87d2fdb1acde4c2750b37994304b5c9371aa5
 homepage    : https://community.kde.org/Frameworks
 license     :
     - BSD-3-Clause

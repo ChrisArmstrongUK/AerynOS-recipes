@@ -1,0 +1,35 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : layer-shell-qt
+version     : 6.5.1
+release     : 9
+upstreams   :
+    - https://download.kde.org/stable/plasma/6.5.1/layer-shell-qt-6.5.1.tar.xz : f7367d69f8d1332dd7dc6329521425febbb813faa7f09a7a6e103d41bfb70ac2
+homepage    : https://kde.org/plasma-desktop/
+license     :
+    - BSD-3-Clause
+    - CC0-1.0
+    - LGPL-3.0-or-later
+    - MIT
+summary     : Qt component to allow applications to make use of the Wayland wl-layer-shell protocol
+description : |
+    Qt component to allow applications to make use of the Wayland wl-layer-shell protocol
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+    - cmake(Qt6CorePrivate)
+    - cmake(Qt6Qml)
+    - cmake(Qt6WaylandClient)
+    - pkgconfig(wayland-protocols)
+tuning      :
+    - lto: full
+    - optimize: speed
+setup       : |
+    %cmake_kf6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install

@@ -4,23 +4,22 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : python-attrs
-version     : 24.2.0
-release     : 4
+version     : 25.4.0
+release     : 9
 homepage    : https://pypi.org/project/attrs
 upstreams   :
-    - https://files.pythonhosted.org/packages/source/a/attrs/attrs-24.2.0.tar.gz : 5cfb1b9148b5b086569baec03f20d7b6bf3bcacc9a42bebf87ffaaca362f6346
+    - https://pypi.debian.net/attrs/attrs-25.4.0.tar.gz : 16d5969b87f0859ef33a48b35d55ac1be6e42ae49d5e853b597db70c35c57e11
 summary     : Classes Without Boilerplate
 description : |
     attrs is the Python package that will bring back the joy of writing classes by relieving you from the drudgery of implementing object protocols (aka dunder methods). Its main goal is to help you to write concise and correct software without slowing down your code.
 license     :
     - JSON
 builddeps   :
-    - binary(python3)
+    - python(hatch-fancy-pypi-readme)
+    - python(hatch-vcs)
     - python(hatchling)
-    - python-hatch-vcs
-    - python-hatch-fancy-pypi-readme
 rundeps     :
-    - binary(python3)
+    - python-libs
 build       : |
     %pyproject_build
 install     : |

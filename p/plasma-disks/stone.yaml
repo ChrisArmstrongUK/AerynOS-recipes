@@ -1,0 +1,43 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : plasma-disks
+version     : 6.5.1
+release     : 7
+upstreams   :
+    - https://download.kde.org/stable/plasma/6.5.1/plasma-disks-6.5.1.tar.xz : fe0e8bb061bec225d8b3480d16c9d8bee9f0606f074fa5165757f48e720e4143
+homepage    : https://kde.org/plasma-desktop/
+license     :
+    - BSD-3-Clause
+    - GPL-2.0-only
+    - GPL-3.0-only
+    - LGPL-3.0-only
+summary     : Monitors S.M.A.R.T. capable devices for imminent failure
+description : |
+    Monitors S.M.A.R.T. capable devices for imminent failure
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+    - cmake(KF6Auth)
+    - cmake(KF6CoreAddons)
+    - cmake(KF6DBusAddons)
+    - cmake(KF6I18n)
+    - cmake(KF6KCMUtils)
+    - cmake(KF6KIO)
+    - cmake(KF6Notifications)
+    - cmake(KF6Service)
+    - cmake(KF6Solid)
+    - sysbinary(smartctl)
+rundeps     :
+    - sysbinary(smartctl)
+tuning      :
+    - lto: full
+    - optimize: speed
+setup       : |
+    %cmake_kf6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install

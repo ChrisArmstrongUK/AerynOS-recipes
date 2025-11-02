@@ -1,0 +1,39 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : kglobalacceld
+version     : 6.5.1
+release     : 9
+upstreams   :
+    - https://download.kde.org/stable/plasma/6.5.1/kglobalacceld-6.5.1.tar.xz : 5f7a668dbae576eef0d16058183b0089a7623bec0083c5ca5a3709ac97bac9e3
+homepage    : https://kde.org/plasma-desktop/
+license     :
+    - LGPL-2.0-or-later
+    - LGPL-2.1-only
+    - LGPL-3.0-only
+summary     : Daemon providing Global Keyboard Shortcut (Accelerator) functionality
+description : |
+    Daemon providing Global Keyboard Shortcut (Accelerator) functionality
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+    - cmake(KF6Config)
+    - cmake(KF6CoreAddons)
+    - cmake(KF6Crash)
+    - cmake(KF6DBusAddons)
+    - cmake(KF6GlobalAccel)
+    - cmake(KF6KIO)
+    - cmake(KF6Service)
+    - cmake(KF6WindowSystem)
+    - cmake(Qt6CorePrivate)
+tuning      :
+    - lto: full
+    - optimize: speed
+setup       : |
+    %cmake_kf6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install

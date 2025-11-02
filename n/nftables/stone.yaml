@@ -4,11 +4,11 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : nftables
-version     : 1.1.1
-release     : 5
+version     : 1.1.5
+release     : 9
 homepage    : https://www.netfilter.org/projects/nftables/
 upstreams   :
-    - https://netfilter.org/pub/nftables/nftables-1.1.1.tar.xz : 6358830f3a64f31e39b0ad421d7dadcd240b72343ded48d8ef13b8faf204865a
+    - https://netfilter.org/pub/nftables/nftables-1.1.5.tar.xz : 1daf10f322e14fd90a017538aaf2c034d7cc1eb1cc418ded47445d714ea168d4
 summary     : Netfilter nf_tables user library
 description : |
     Netfilter nf_tables user library
@@ -21,11 +21,13 @@ builddeps   :
     - pkgconfig(libmnl)
     - pkgconfig(libnftnl)
     - pkgconfig(readline)
+    - python(setuptools)
 setup       : |
-    %configure --disable-static \
-               --sysconfdir=%(vendordir)/etc/ \
-               --with-json \
-               --with-cli=readline
+    %configure \
+        --disable-static \
+        --sysconfdir=%(vendordir)/ \
+        --with-json \
+        --with-cli=readline
 build       : |
     %make
 
@@ -37,17 +39,19 @@ install     : |
     pushd py
     %pyproject_install
 tune        :
-    - lto
+    - lto: full
     - optimize: speed
 packages    :
     - "%(name)-docs":
         paths:
             - /usr/share/doc/*
+
     - "python-%(name)":
         summary: "Netfilter nf_tables user library - Python library"
         description: |
             Netfilter nf_tables user library - Python Library
         rundeps:
-            - binary(python3)
+            - "%(name)"
+            - python-libs
         paths:
             - /usr/lib/python*

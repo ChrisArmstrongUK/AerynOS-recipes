@@ -4,10 +4,10 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : dolphin
-version     : 24.12.3
-release     : 2
+version     : 25.08.2
+release     : 14
 upstreams   :
-    - https://download.kde.org/stable/release-service/24.12.3/src/dolphin-24.12.3.tar.xz : 0bcefb5c6eadddb867924e9052d5431c5b7c98aa4022c3fa2ca16d5b6515b0f0
+    - https://download.kde.org/stable/release-service/25.08.2/src/dolphin-25.08.2.tar.xz : 06f4f1698f6407fd34b8c9b2103d91a21ccab6467485bb5fa23e23736ea66791
 homepage    : https://kde.org/applications/system/org.kde.dolphin
 license     :
     - GFDL-1.2-or-later
@@ -42,17 +42,37 @@ builddeps   :
     - cmake(KF6UserFeedback)
     - cmake(KF6WidgetsAddons)
     - cmake(KF6WindowSystem)
-    - cmake(Phonon4Qt6)
+    - cmake(Qt6CorePrivate)
+    - cmake(Qt6Multimedia)
     # Todo build with packagekit support
 rundeps     :
-    - phonon-backend-mpv-qt6
+    # KIO features
+    - kio-admin
+    - kio-extras
+    - kio-fuse
+
+    - konsole-part # Integrated terminal
+    # So it always runs correctly on Wayland
     - qt6-wayland
+
+    # Image previews
+    - qt6-imageformats
+    - kf6-kimageformats
 setup       : |
     %cmake_kf6
 build       : |
     %cmake_build
 install     : |
     %cmake_install
+packages    :
+    - "%(name)-libs":
+        paths:
+            - /usr/lib/libdolphinprivate.so.*
+            - /usr/lib/libdolphinvcs.so.*
+            - /usr/lib/qt6/plugins/dolphin/
+            - /usr/lib/qt6/plugins/kf6/kfileitemaction/
+            - /usr/lib/qt6/plugins/kf6/parts/dolphinpart.so
 
-    # remove docs
-    rm -rf %(installroot)/%(datadir)/doc
+    - "%(name)-docs":
+        paths:
+            - /usr/share/doc

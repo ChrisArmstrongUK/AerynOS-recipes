@@ -4,11 +4,11 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : python-packaging
-version     : 24.1
-release     : 2
+version     : "25.0"
+release     : 6
 homepage    : https://packaging.pypa.io
 upstreams   :
-    - https://pypi.io/packages/source/p/packaging/packaging-24.1.tar.gz : 026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002
+    - https://pypi.debian.net/packaging/packaging-25.0.tar.gz : d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f
 summary     : Core utilities for Python packages
 description : |
     Reusable core utilities for various Python Packaging interoperability specifications.
@@ -16,7 +16,9 @@ license     :
     - Apache-2.0
     - BSD-2-Clause
 builddeps   :
-    - python(flit_core)
+    - python(flit-core)
+rundeps     :
+    - binary(python3)
 build       : |
     %pyproject_build
 install     : |

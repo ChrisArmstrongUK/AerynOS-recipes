@@ -4,10 +4,10 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : kf6-baloo
-version     : 6.12.0
-release     : 2
+version     : 6.19.0
+release     : 14
 upstreams   :
-    - https://download.kde.org/stable/frameworks/6.12/baloo-6.12.0.tar.xz : 89844fab9c792df5a2a19e83242e4fc71ffc5fd51e18e2b3d9063771d5096b5e
+    - https://download.kde.org/stable/frameworks/6.19/baloo-6.19.0.tar.xz : af3d5d85d4ed22963564fa6cc5557d489f17cba30d58308bba8c4c93d4e84688
 homepage    : https://community.kde.org/Frameworks
 license     :
     - GPL-2.0-or-later
@@ -28,6 +28,7 @@ builddeps   :
     - cmake(KF6IdleTime)
     - cmake(KF6KIO)
     - cmake(KF6Solid)
+    - cmake(Qt6CorePrivate)
     - cmake(Qt6Qml)
     - lmdb-devel
 setup       : |
@@ -36,3 +37,7 @@ build       : |
     %cmake_build
 install     : |
     %cmake_install
+packages    :
+    - "%(name)-devel":
+        rundeps:
+            - cmake(KF6FileMetaData)

@@ -1,0 +1,46 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : akonadi-import-wizard
+version     : 25.08.2
+release     : 6
+upstreams   :
+    - https://download.kde.org/stable/release-service/25.08.2/src/akonadi-import-wizard-25.08.2.tar.xz : 391435269f2c061a09e8a727a5ba6e39d3c5908b6917a11846d8446e49a03bd5
+homepage    : https://kde.org
+license     :
+    - GFDL-1.2-or-later
+    - GPL-2.0-or-later
+summary     : Assistant to import PIM data from other applications into Akonadi
+description : |
+    Assistant to import PIM data from other applications into Akonadi for use in KDE PIM applications.
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+    - cmake(KF6Archive)
+    - cmake(KF6Config)
+    - cmake(KF6Contacts)
+    - cmake(KF6Crash)
+    - cmake(KF6DBusAddons)
+    - cmake(KF6DocTools)
+    - cmake(KF6IconThemes)
+    - cmake(KF6KIO)
+    - cmake(KPim6Akonadi)
+    - cmake(KPim6IdentityManagementCore)
+    - cmake(KPim6MailCommon)
+    - cmake(KPim6MailImporterAkonadi)
+    - cmake(KPim6MailTransport)
+    - cmake(KPim6MessageViewer)
+    - cmake(KPim6PimCommonAkonadi)
+    - cmake(Qt6Keychain)
+setup       : |
+    %cmake_kf6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install
+packages    :
+    - "%(name)-docs":
+        paths:
+            - /usr/share/doc

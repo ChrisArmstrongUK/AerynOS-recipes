@@ -4,11 +4,12 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : qt5-base
-version     : 5.15.16+kde.2529f7f0
-release     : 7
+version     : 5.15.17+kde.c5b9db06
+release     : 14
 homepage    : https://www.qt.io
 upstreams   :
-    - git|https://invent.kde.org/qt/qt/qtbase.git : 2529f7f0c2333d437089c775c9c30f624d1fd5bc
+    - git|https://invent.kde.org/qt/qt/qtbase.git:
+        ref: c5b9db065ca5682b0bee339197c847da8b2710c1
 summary     : Cross platform application and UI framework
 description : |
     Cross platform application and UI framework
@@ -44,6 +45,7 @@ builddeps   :
     - pkgconfig(md4c)
     - pkgconfig(shared-mime-info)
     - pkgconfig(sqlite3)
+    - pkgconfig(tslib)
     - pkgconfig(x11)
     - pkgconfig(xcb)
     - pkgconfig(xcb-icccm)
@@ -52,6 +54,7 @@ builddeps   :
     - pkgconfig(xcb-randr)
     - pkgconfig(xcb-renderutil)
     - pkgconfig(xkbcommon)
+    - pkgconfig(xkbcommon-x11)
     - pkgconfig(zlib)
     - vulkan-headers
 setup       : |
@@ -118,9 +121,7 @@ setup       : |
                 QMAKE_LFLAGS_RELEASE="${LDFLAGS}"
 build       : |
     %ccache_zero
-
     %make
-
     %ccache_stats
 install     : |
     %make_install INSTALL_ROOT="%(installroot)"
@@ -142,6 +143,7 @@ packages    :
         paths:
             - /usr/bin
         rundeps:
+            - binary(perl)
             - pkgconfig(fontconfig)
             - pkgconfig(freetype2)
             - pkgconfig(gl)

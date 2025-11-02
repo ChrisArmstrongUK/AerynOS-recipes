@@ -4,10 +4,10 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : kf6-ktexteditor
-version     : 6.12.0
-release     : 2
+version     : 6.19.0
+release     : 10
 upstreams   :
-    - https://download.kde.org/stable/frameworks/6.12/ktexteditor-6.12.0.tar.xz : d5d21ea65f9c84a9bda3fbad3d8df70c76924d9d561822069eeb9ce862924a3f
+    - https://download.kde.org/stable/frameworks/6.19/ktexteditor-6.19.0.tar.xz : f2382910fe32e92bfd07def4e8f53d58d85725194a244123d938ab0c42a807f1
 homepage    : https://community.kde.org/Frameworks
 license     :
     - BSD-2-Clause

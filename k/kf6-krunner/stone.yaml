@@ -1,0 +1,36 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : kf6-krunner
+version     : 6.19.0
+release     : 7
+upstreams   :
+    - https://download.kde.org/stable/frameworks/6.19/krunner-6.19.0.tar.xz : d59ca1a7142529bdca28f539dc7b3784f975be68b36c69d0c3e6835966ec32ab
+homepage    : https://community.kde.org/Frameworks
+license     : LGPL-2.0-or-later
+summary     : Framework for Plasma runners
+description : |
+    Framework for Plasma runners
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+    - cmake(KF6Config)
+    - cmake(KF6CoreAddons)
+    - cmake(KF6I18n)
+    - cmake(KF6ItemModels)
+    - cmake(KF6WindowSystem)
+setup       : |
+    %cmake_kf6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install
+packages    :
+    - "%(name)-devel":
+        rundeps:
+            - cmake(KF6CoreAddons)
+        paths:
+            - /usr/share/dbus-1/interfaces/
+            - /usr/share/kdevappwizard/

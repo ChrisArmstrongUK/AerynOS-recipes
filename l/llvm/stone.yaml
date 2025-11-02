@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : llvm
-version     : 19.1.7
-release     : 21
+version     : 21.1.4
+release     : 40
 summary     : Low Level Virtual Machine
 license     :
     - Apache-2.0 WITH LLVM-exception
@@ -14,36 +14,36 @@ homepage    : https://www.llvm.org
 description : |
     Low Level Virtual Machine
 upstreams   :
-    - https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/llvm-project-19.1.7.src.tar.xz : 82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501
+    - https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.4/llvm-project-21.1.4.src.tar.xz : a01ad7e5167780c945871d75c0413081d12067607a6de5cf71dc3e8d1a82112c
 builddeps   :
-    - binary(ninja)
     - binary(perl)
     - binary(python3)
     - binary(sed)
+    - binary(swig)
     - pkgconfig(hwloc)
     - pkgconfig(libedit)
+    - pkgconfig(liblzma)
+    - pkgconfig(ncurses)
     - pkgconfig(mimalloc)
+    - pkgconfig(python3)
     - pkgconfig32(libffi)
     - pkgconfig32(libxcrypt)
     - pkgconfig32(libxml-2.0)
     - pkgconfig32(libzstd)
     - pkgconfig32(zlib)
+    - python(myst-parser)
+    - python(sphinx)
     - binutils-devel
-    - clang-32bit
-    - g++-32bit
-    - glibc-32bit-devel
-    - libcxx-32bit-devel
-    # TODO: Package python-myst-parser so we can build man pages
-# LTO needs to be set in LLVM cmake flags so it adds -fno-lto where needed
+    - libquadmath-devel
+    - mimalloc-static # TODO: Figure out if we can actually split mimalloc-static, or if it needs to go back in.
 tuning      :
     - fortify: false
     - frame-pointer: false
     - harden: false
     - icf: all
-    - lto: false
+    - lto: false # LTO needs to be set in LLVM cmake flags so it adds -fno-lto where needed
     - nosemantic
     - optimize: speed
-    - polly
     - symbolic
 environment : |
     if [[ %(target_triple) = i686* ]]; then
@@ -52,128 +52,294 @@ environment : |
 
         # We really only care about 32bit LLVM in the context of Mesa which doesn't need anything besides libLLVM
         # Additionally it's possible that we really only need it to support the AMDGPU target but that is untested.
+        # 2025-05: Add SPIRV just in case that's ever needed (seems possible in a graphics context)
         # TODO: Test that. Low priority since the 32bit build is already relatively short
-        _BUILD_TARGETS="X86;AMDGPU"
+        _BUILD_TARGETS="AMDGPU;SPIRV;X86"
         _PROJECTS="llvm"
+        _RUNTIMES="libcxx;libcxxabi;libunwind"
 
     else
         _TARGET_ARCH=x86_64
         _IS_64BIT_BUILD="ON"
 
         # Full-fat (in the milk sense) build suitable for cross-compilation
-        _BUILD_TARGETS="X86;AMDGPU;AArch64;ARM;BPF;WebAssembly"
-        _PROJECTS="clang;clang-tools-extra;compiler-rt;lld;llvm;openmp;polly"
+        _BUILD_TARGETS="AArch64;AMDGPU;ARM;BPF;RISCV;SPIRV;WebAssembly;X86"
+        _PROJECTS="bolt;clang;clang-tools-extra;flang;lld;lldb;llvm;mlir;polly"
+        _RUNTIMES="compiler-rt;flang-rt;libclc;libcxx;libcxxabi;libunwind;offload;openmp"
     fi
 
     if [[ " ${PATH[*]} " =~ "ccache" ]]; then
         EXTRA_LLVM_FLAGS="-DLLVM_CCACHE_BUILD=ON"
     fi
 
-    # Without RPATH, we need help finding the right libraries to use
-    export LD_LIBRARY_PATH="%(workdir)/%(builddir)/lib%(libsuffix)"
-
     function apply_llvm_patches() {
         # Build-related patches, achieving adjustments/fixes to the build that cannot be done via cmake flags
-        %patch %(pkgdir)/patches/build/build-libLLVMSupport-for-perf-training.patch
         %patch %(pkgdir)/patches/build/0001-Build-lld-libraries-shared.patch
         %patch %(pkgdir)/patches/build/0001-Build-polly-libraries-shared.patch
         %patch %(pkgdir)/patches/build/0001-Emit-relocations-for-BOLT.patch
-        %patch %(pkgdir)/patches/build/0003-PATCH-clang-Don-t-install-static-libraries.patch
+        %patch %(pkgdir)/patches/build/0001-PATCH-clang-Don-t-install-static-libraries.patch
         %patch %(pkgdir)/patches/build/0001-downstream-Suppress-runpath-in-openmp.patch
+        %patch %(pkgdir)/patches/build/0001-bolt-Set-version-string.patch
+        %patch %(pkgdir)/patches/build/0001-openmp-Don-t-install-static-libarcher.patch
+        %patch %(pkgdir)/patches/build/0001-polly-Create-targets-for-headers-cmake.patch
+        %patch %(pkgdir)/patches/build/0001-lldb-disable-man.patch
+        %patch %(pkgdir)/patches/build/0001-offload-Fix-build-failure-with-icf-all.patch
 
         # Runtime config changes. These often duplicate settings set by our CFLAGS/LDFLAGS and are intended as sane
         # defaults when a build either doesn't respect our flags or when a user is building a project outside of
         # our build system
-        %patch %(pkgdir)/patches/config/0001-Make-gnu-hash-the-default-for-lld-and-clang.patch
+        %patch %(pkgdir)/patches/config/0001-Make-gnuhash-the-default-when-not-specified.patch
         %patch %(pkgdir)/patches/config/0001-lld-Use-zstd-compression-for-debug-symbols-by-defaul.patch
         %patch %(pkgdir)/patches/config/0001-lld-Always-enable-build-id-and-use-20-byte-hashes.patch
 
-        # Serpent-specific patches
-        %patch %(pkgdir)/patches/serpent/0001-Support-serpent-as-a-distro.patch
-        %patch %(pkgdir)/patches/serpent/0001-Use-correct-Serpent-OS-multilib-paths-for-ld.patch
-        %patch %(pkgdir)/patches/serpent/0001-Update-binutils-version-to-match-Serpent-OS.patch
-        %patch %(pkgdir)/patches/serpent/ignore-werror.patch
+        # Aeryn-specific patches
+        %patch %(pkgdir)/patches/aerynos/0001-Support-serpent-aeryn-as-a-distro.patch
+        %patch %(pkgdir)/patches/aerynos/0001-Use-correct-Serpent-OS-multilib-paths-for-ld.patch
+        %patch %(pkgdir)/patches/aerynos/0001-Update-binutils-version-to-match-Serpent-OS.patch
+        %patch %(pkgdir)/patches/aerynos/0001-clang-lib-Ignore-Werror-if-CLANG_IGNORE_WERROR-is-se.patch
 
         # Performance-related patches
         %patch %(pkgdir)/patches/perf/0001-Reduce-GCC-startup-searches.patch
         %patch %(pkgdir)/patches/perf/0001-Use-mimalloc-for-clang-lld-llvm.patch
 
-        # Upstream backports
-        ## Empty (for now)
+        ## Upstream backports
+        # Can be dropped once we switch to libstdc++
+        %patch %(pkgdir)/patches/upstream/149326.patch
+        %patch %(pkgdir)/patches/upstream/155422.patch
     }
 
+    # 2025-03-25: Add LIBCXX_TYPEINFO_COMPARISON_IMPLEMENTATION=2 for https://bugs.kde.org/show_bug.cgi?id=479679
+    #  See also https://github.com/llvm/llvm-project/issues/36746
+    # TODO is it worth adding Lua support to lldb?
+    # 2025-10-16: Using FLANG_RT_ENABLE_SHARED=ON causes the flang-rt build to fail with linker errors. TODO fix that.
     function cmake_llvm_configure() {
         %cmake \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_SKIP_RPATH=ON \
-            -DCLANG_DEFAULT_CXX_STDLIB=libc++ \
+            -DCMAKE_SKIP_INSTALL_RPATH=ON \
+            -DBOLT_PACKAGE_VERSION=%(version) \
             -DCLANG_DEFAULT_LINKER=lld \
             -DCLANG_DEFAULT_OBJCOPY=llvm-objcopy \
             -DCLANG_DEFAULT_PIE_ON_LINUX=ON \
-            -DCLANG_DEFAULT_RTLIB=compiler-rt \
-            -DCLANG_DEFAULT_UNWINDLIB=libunwind \
             -DCLANG_LINK_CLANG_DYLIB=ON \
-            -DCLANG_REPOSITORY_STRING="Serpent %(version)-%(release)" \
-            -DCOMPILER_RT_USE_BUILTINS_LIBRARY=ON \
-            -DCOMPILER_RT_USE_LIBCXX=ON \
+            -DCLANG_PLUGIN_SUPPORT=ON \
+            -DCLANG_REPOSITORY_STRING="AerynOS" \
             -DENABLE_LINKER_BUILD_ID=ON \
+            -DFLANG_RT_ENABLE_SHARED=OFF \
+            -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=ON \
+            -DLIBCXX_STATICALLY_LINK_ABI_IN_STATIC_LIBRARY=ON \
+            -DLIBCXXABI_USE_LLVM_UNWINDER=OFF \
             -DLIBOMP_INSTALL_ALIASES=OFF \
             -DLIBOMP_USE_HWLOC=ON \
+            -DLIBUNWIND_INSTALL_HEADERS=ON \
+            -DLIBUNWIND_INSTALL_LIBRARY=ON \
+            -DLLDB_ENABLE_LIBEDIT=ON \
+            -DLLDB_ENABLE_CURSES=ON \
+            -DLLDB_ENABLE_LZMA=ON \
+            -DLLDB_ENABLE_LIBXML2=ON \
+            -DLLDB_ENABLE_PYTHON=ON \
+            -DLLDB_ENABLE_LUA=OFF \
+            -DLLDB_NO_INSTALL_DEFAULT_RPATH=ON \
+            -DLLDB_SKIP_STRIP=ON \
             -DLLVM_APPEND_VC_REV=OFF \
             -DLLVM_BINUTILS_INCDIR=/usr/include \
+            -DLLVM_BUILD_DOCS=$_IS_64BIT_BUILD \
             -DLLVM_BUILD_LLVM_DYLIB=ON \
             -DLLVM_BUILD_TOOLS=ON \
             -DLLVM_DEFAULT_TARGET_TRIPLE=%(build_platform) \
             -DLLVM_DYLIB_COMPONENTS="all" \
+            -DLLVM_ENABLE_DOXYGEN=OFF \
             -DLLVM_ENABLE_FFI=ON \
-            -DLLVM_ENABLE_LIBCXX=ON \
             -DLLVM_ENABLE_LIBXML2=ON \
             -DLLVM_ENABLE_LTO=Thin \
             -DLLVM_ENABLE_MIMALLOC=$_IS_64BIT_BUILD \
             -DLLVM_ENABLE_MODULES=OFF \
             -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF \
+            -DLLVM_ENABLE_PLUGINS=ON \
             -DLLVM_ENABLE_PROJECTS=$_PROJECTS \
+            -DLLVM_ENABLE_RTTI=ON \
+            -DLLVM_ENABLE_RUNTIMES=$_RUNTIMES \
+            -DLLVM_ENABLE_SPHINX=$_IS_64BIT_BUILD \
             -DLLVM_ENABLE_ZLIB=ON \
             -DLLVM_ENABLE_ZSTD=ON \
             -DLLVM_INCLUDE_BENCHMARKS=OFF \
+            -DLLVM_INCLUDE_DOCS=$_IS_64BIT_BUILD \
+            -DLLVM_INCLUDE_EXAMPLES=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
             -DLLVM_INCLUDE_UTILS=$_IS_64BIT_BUILD \
             -DLLVM_INSTALL_UTILS=$_IS_64BIT_BUILD \
             -DLLVM_LIBDIR_SUFFIX=%(libsuffix) \
             -DLLVM_LINK_LLVM_DYLIB=ON \
+            -DLLVM_PARALLEL_LINK_JOBS=1 \
+            -DLLVM_POLLY_LINK_INTO_TOOLS=OFF \
             -DLLVM_TARGET_ARCH=$_TARGET_ARCH \
             -DLLVM_TARGETS_TO_BUILD=$_BUILD_TARGETS \
+            -DLLVM_TOOL_OPENMP_BUILD=ON \
             -DLLVM_USE_PERF=$_IS_64BIT_BUILD \
             -DLLVM_USE_SANITIZER=OFF \
-            -DLLVM_ENABLE_RTTI=ON \
+            -DMLIR_BUILD_MLIR_C_DYLIB=ON \
+            -DMLIR_INSTALL_AGGREGATE_OBJECTS=OFF \
+            -DMLIR_LINK_MLIR_DYLIB=ON \
             -DOPENMP_INSTALL_LIBDIR="%(libdir)" \
+            -DSPHINX_OUTPUT_MAN=$_IS_64BIT_BUILD \
+            -DSPHINX_OUTPUT_HTML=OFF \
             $EXTRA_LLVM_FLAGS \
             "$@"
+    }
+
+    # "Inspired by"/"Gratuitously copied from" Gentoo, use LLVM_DISTRIBUTION_COMPONENTS to avoid installing static libs
+    # and other unnecessary things. This works by extracting the target list from ninja and
+    # filtering it to only have the things we really need. This way when cmake target files
+    # are generated it results in the components we didn't include not being added to the
+    # searched for objects.
+    ## NOTE: New versions of LLVM should be built without this in order to see what's been
+    ## added/removed and this list updated correspondingly.
+    function get_distribution_components() {
+        # This generates a lot of output that we don't need to see
+        set +x
+        local target
+        ninja -C "%(builddir)" -t targets | grep -Po 'install-\K.*(?=-stripped:)' | while read -r target; do
+            case $target in
+                distribution)
+                    continue
+                    ;;
+
+                ### LLVM
+                llvm-libraries)
+                    continue
+                    ;;
+                # shared libraries
+                LLVM|LLVMgold|LTO|Remarks)
+                    ;;
+                # Used by LDC
+                LLVMTableGen|LLVMSupport|LLVMDemangle)
+                    ;;
+                # Devel
+                llvm-headers|cmake-exports)
+                    ;;
+                # Bins
+                FileCheck|UnicodeNameMappingGenerator|bugpoint|dsymutil|llc|lli|obj2yaml|opt|opt-viewer|reduce-chunk-list|sancov|sanstats|split-file|verify-uselistorder|yaml2obj)
+                    ;;
+                # Devel bins
+                count|lli-child-target|not|yaml-bench)
+                    ;;
+                # Various binaries (everything we don't want has already been excluded)
+                llvm-*)
+                    ;;
+
+                ### Clang
+                clang-libraries)
+                    continue
+                    ;;
+                clang-tidy-headers)
+                    continue
+                    ;;
+                # Libs
+                libclang|clang-cpp)
+                    ;;
+                clang|clangd|clang-*|bash-autocomplete)
+                    ;;
+                # Other clang tools
+                c-index-test|diagtool|find-all-symbols|hmaptool|modularize|offload-arch|pp-trace|scan-view|scan-build*)
+                    ;;
+                clang*|findAllSymbols)
+                    continue
+                    ;;
+
+                ### LLD
+                # Shared libraries
+                lld|lld-libraries)
+                    ;;
+                # Devel
+                lld-headers|lld-cmake-exports)
+                    ;;
+
+                ### LLDB
+                # bin
+                lldb|lldb-python-scripts|lldb-argdumper|lldb-dap|lldb-instr|lldb-server)
+                    ;;
+                # libs
+                liblldb|lldbIntelFeatures)
+                    ;;
+                # Devel
+                lldb-headers)
+                    ;;
+
+                ### Polly
+                # Libs
+                Polly|PollyISL|LLVMPolly)
+                    ;;
+                # Devel
+                polly-headers|polly-cmake-exports)
+                    ;;
+
+                ### BOLT
+                bolt)
+                    ;;
+
+                ### MLIR
+                mlir-libraries)
+                    continue
+                    ;;
+                # Shared libs
+                MLIR|MLIR-C|MLIRExecutionEngineShared)
+                    ;;
+                # Target libs
+                mlir_*)
+                    ;;
+                # MLIR tools
+                mlir-*|tblgen-lsp-server|tblgen-to-irdl)
+                    ;;
+                # Devel
+                mlir-headers|mlir-cmake-exports)
+                    ;;
+                # MLIR dependencies
+                MLIRSparseTensorRuntime|MLIRSparseTensorEnums)
+                    ;;
+
+                ### Flang
+                # Flang itself
+                flang)
+                    ;;
+                # Supporting tools
+                bbc|tco|f18-parse-demo|fir-*)
+                    ;;
+                # Fortran build files
+                flang-binding|flang-module-interfaces|flang-fortran-binding)
+                    ;;
+
+                ### built-ins, Runtimes
+                builtins|runtimes)
+                    ;;
+
+                ### Deny everything else
+                *)
+                    continue
+                    ;;
+            esac
+            echo $target
+        done
+        set -x
     }
 profiles    :
     - emul32:
         setup:   |
             apply_llvm_patches
 
-            export CC="clang"
-            export CXX="clang++"
+            cmake_llvm_configure -S llvm \
+                -DLLVM_USE_LINKER="lld"
+
+            distribution_components=$(get_distribution_components | paste -sd\;)
+            test -n "$distribution_components"
             cmake_llvm_configure -S llvm \
                 -DLLVM_USE_LINKER="lld" \
-                -DCMAKE_C_FLAGS="$CFLAGS -m32" \
-                -DCMAKE_CXX_FLAGS="$CXXFLAGS -m32"
+                -DLLVM_DISTRIBUTION_COMPONENTS="$distribution_components"
         build:   |
-            if [[ " ${PATH[*]} " =~ "ccache" ]]; then
-                ccache --zero-stats
-            fi
-
-            %cmake_build
-
-            if [[ " ${PATH[*]} " =~ "ccache" ]]; then
-                ccache --show-stats
-            fi
+            %ccache_zero
+            %cmake_build --target distribution
+            %ccache_stats
         install: |
-            %cmake_install
+            DESTDIR="%(installroot)" cmake --build "%(builddir)" --verbose --target install-distribution
 
+            ### LLVM (begin)
             # Force this to 32-bit specific configuration
             mv %(installroot)%(bindir)/llvm-config %(installroot)%(bindir)/llvm-config32
             mv %(installroot)%(includedir)/llvm/Config/llvm-config.h %(installroot)%(includedir)/llvm/Config/llvm-config32.h
@@ -181,6 +347,13 @@ profiles    :
             # Make sure that the .defs files are arch-dependent
             mkdir %(installroot)/usr/include/llvm/Config/32
             mv %(installroot)/usr/include/llvm/Config/*.def %(installroot)/usr/include/llvm/Config/32/
+            # LLVM (end)
+
+            ### libcxx/libunwind (begin)
+            # Origin: https://raw.githubusercontent.com/kraj/meta-clang/master/recipes-devtools/clang/clang/libunwind.pc.in
+            %install_dir %(installroot)%(libdir)/pkgconfig
+            sed -e 's@\@LIBDIR\@@%(libdir)@g' -e 's/@VERSION@/%(version)/g' %(pkgdir)/libunwind.pc.in > %(installroot)%(libdir)/pkgconfig/libunwind.pc
+            # libcxx/libunwind (end)
     - x86_64:
         setup:   |
             apply_llvm_patches
@@ -194,23 +367,28 @@ profiles    :
 
             # find pgo-training -name "clang.profdata" -exec mv {} %(workdir) \;
 
+            cmake_llvm_configure llvm
+
+            distribution_components=$(get_distribution_components | paste -sd\;)
+            test -n "$distribution_components"
             cmake_llvm_configure llvm \
-                # -DLLVM_PROFDATA_FILE=%(workdir)/clang.profdata
+                -DLLVM_DISTRIBUTION_COMPONENTS="$distribution_components"
         build:   |
-            if [[ " ${PATH[*]} " =~ "ccache" ]]; then
-                ccache --zero-stats
-            fi
+            %ccache_zero
+            %cmake_build --target distribution
 
-            %cmake_build
-
-            if [[ " ${PATH[*]} " =~ "ccache" ]]; then
-                ccache --show-stats
-            fi
+            # Generate man pages (this list will need to be updated on every major LLVM update)
+            %cmake_build --target docs-clang-man docs-clang-tools-man docs-dsymutil-man docs-flang-man docs-llvm-dwarfdump-man docs-llvm-man docs-polly-man
+            %ccache_stats
         install: |
-            %cmake_install
+            DESTDIR="%(installroot)" cmake --build "%(builddir)" --verbose --target install-distribution
 
-            %install_dir %(installroot)/%(libdir)/bfd-plugins
-            ln -srf %(installroot)/%(libdir)/LLVMgold.so %(installroot)/%(libdir)/bfd-plugins/LLVMgold.so
+            # Install man pages
+            DESTDIR="%(installroot)" cmake --build "%(builddir)" --verbose --target install-docs-clang-man install-docs-clang-tools-man install-docs-dsymutil-man install-docs-flang-man install-docs-llvm-dwarfdump-man install-docs-llvm-man install-docs-polly-man
+
+            # Unused man pages (or used elsewhere like the lldb-tblgen one)
+            rm -fv %(installroot)%(mandir)/man1/lit* \
+                   %(installroot)%(mandir)/man1/lldb-tblgen*
 
             # TODO: Restore the bolt'd build
 
@@ -237,11 +415,9 @@ profiles    :
             #   bolt_opt %(installroot)/$i
             # done
 
-            # Remove static libs with equivalent shared libraries
-            rm -v %(installroot)/usr/lib/libarcher_static.a
-
-            # We probably don't need this
-            rm -rfv %(installroot)/%(includedir)/clang-tidy
+            ### LLVM (begin)
+            %install_dir %(installroot)/%(libdir)/bfd-plugins
+            ln -srf %(installroot)/%(libdir)/LLVMgold.so %(installroot)/%(libdir)/bfd-plugins/LLVMgold.so
 
             # Finish supporting 32 & 64bit llvm config headers
             mv %(installroot)%(includedir)/llvm/Config/llvm-config.h %(installroot)%(includedir)/llvm/Config/llvm-config64.h
@@ -254,7 +430,40 @@ profiles    :
                 mv $i 64/
                 cat %(pkgdir)/defs.h.in | sed "s|@@REPLACE@@|$i|g" > $i
             done
-architectures: [emul32, native]
+            # LLVM (end)
+
+            ### Clang (begin)
+            # Fix bash completion dir
+            %install_dir %(installroot)%(bashcompletionsdir)
+            mv %(installroot)/usr/share/clang/bash-autocomplete.sh %(installroot)%(bashcompletionsdir)/clang
+
+            # Provides cc/c++ on Aeryn
+            for i in cc %(host_platform)-cc x86_64-serpent-linux-cc; do
+                ln -srv %(installroot)%(bindir)/clang %(installroot)%(bindir)/${i}
+                ln -srv %(installroot)%(mandir)/man1/clang.1 %(installroot)%(mandir)/man1/${i}.1
+            done
+            for i in c++ %(host_platform)-c++ x86_64-serpent-linux-c++; do
+                ln -srv %(installroot)%(bindir)/clang++ %(installroot)%(bindir)/${i}
+                ln -srv %(installroot)%(mandir)/man1/clang.1 %(installroot)%(mandir)/man1/${i}.1
+            done
+
+            %install_dir %(installroot)%(docdir)/clang-32bit
+            echo "This file will disappear when virtual packages are introduced" > %(installroot)%(docdir)/clang-32bit/README
+            ### Clang (end)
+
+            ### lld (begin)
+            # Provides ld on Aeryn
+            ln -srv %(installroot)%(bindir)/lld %(installroot)%(bindir)/ld
+            ### lld (end)
+
+            ### libcxx/libunwind (begin)
+            # Origin: https://raw.githubusercontent.com/kraj/meta-clang/master/recipes-devtools/clang/clang/libunwind.pc.in
+            %install_dir %(installroot)%(libdir)/pkgconfig
+            sed -e 's@\@LIBDIR\@@%(libdir)@g' -e 's/@VERSION@/%(version)/g' %(pkgdir)/libunwind.pc.in > %(installroot)%(libdir)/pkgconfig/libunwind.pc
+            # libcxx/libunwind (end)
+
+            %python_compile
+emul32      : true
 packages    :
     - "%(name)-libs":
         summary: "Library files for %(name)"
@@ -284,13 +493,22 @@ packages    :
             - /usr/bin/split-file
             - /usr/bin/verify-uselistorder
             - /usr/bin/yaml2obj
+            - /usr/share/man/man1/FileCheck*
+            - /usr/share/man/man1/bugpoint*
+            - /usr/share/man/man1/dsymutil*
+            - /usr/share/man/man1/llc*
+            - /usr/share/man/man1/lli*
+            - /usr/share/man/man1/llvm-*
+            - /usr/share/man/man1/opt*
             - /usr/share/opt-viewer
 
+    # We can't split out the static libraries from this because the cmake files reference them
     - "%(name)-devel":
         paths:
             - /usr/bin/count
             - /usr/bin/lli-child-target
             - /usr/bin/llvm-config
+            - /usr/bin/llvm-test-mustache-spec
             - /usr/bin/not
             - /usr/bin/yaml-bench
             - /usr/include/llvm*
@@ -300,9 +518,14 @@ packages    :
             - /usr/lib/libLLVM*.a
             - /usr/lib/libLTO.so
             - /usr/lib/libRemarks.so
+            - /usr/share/man/man1/llvm-config*
+            - /usr/share/man/man1/llvm-tblgen*
+            - /usr/share/man/man1/llvm-test-mustache-spec*
+            - /usr/share/man/man1/tblgen* # Maybe?
         rundeps:
             - pkgconfig(libedit)
             - pkgconfig(libzstd)
+            - mlir-devel
             - polly-devel
 
     - "%(name)-32bit":
@@ -327,10 +550,22 @@ packages    :
             - /usr/lib32/libLTO.so
             - /usr/lib32/libRemarks.so
 
+    - "%(name)-bolt":
+        summary: "Binary Optimization and Layout Tool"
+        description: |
+            Binary Optimization and Layout Tool
+        paths:
+            - /usr/bin/llvm-bolt*
+            - /usr/bin/merge-fdata
+            - /usr/bin/perf2bolt
+            - /usr/lib/libbolt*.a
+
     - "clang-libs":
         summary: "Library files for clang"
         description: |
             Library files for clang, typically pulled in as a dependency of another package.
+
+            This package contains the core clang libraries as well as the intrinsics compiler headers.
         paths:
             - /usr/lib/libclang.so.*
             - /usr/lib/libclang-cpp.so.*
@@ -340,19 +575,31 @@ packages    :
         summary: "Clang compiler front-end (LLVM)"
         description: |
             Clang compiler front-end built as part of the LLVM compiler infrastructure project.
+
+            This package contains the clang compiler, the compiler-rt object files for building
+            64bit applications, and the 64bit compiler-rt sanitizer libraries.
         rundeps:
+            # GNU bits and bobs
+            - binary(gcc) # This is used to locate the compiler built-ins and libstdc++ headers
+            - libatomic
+            - libgcc-static
+            - libstdc++-devel
             - glibc-devel
-            - libcxx-devel
+
+            # LLVM toolchain bits
+            - compiler-rt # This is generally not used since we default to GCC built-ins but it is used for PGO
             - lld
             - llvm
             - openmp-devel
             - polly
         paths:
             - /usr/bin/*clang*
-            - /usr/lib/clang/*/bin/*
-            - /usr/lib/clang/*/lib/linux/*x86_64*
-            - /usr/lib/clang/*/share/*
-            - /usr/share/clang
+            - /usr/bin/*cc
+            - /usr/bin/*c++
+            - /usr/share/bash-completion/completions/clang
+            - /usr/share/man/man1/clang*
+            - /usr/share/man/man1/*cc*
+            - /usr/share/man/man1/*c++*
 
     - "clang-tools":
         summary: "Additional Clang tools"
@@ -376,13 +623,11 @@ packages    :
             - /usr/bin/clang-move
             - /usr/bin/clang-nvlink-wrapper
             - /usr/bin/clang-offload-*
-            - /usr/bin/clang-pseudo
             - /usr/bin/clang-query
             - /usr/bin/clang-refactor
-            - /usr/bin/clang-rename
             - /usr/bin/clang-reorder-fields
             - /usr/bin/clang-repl
-            - /usr/bin/clang-scan-deps
+            - /usr/bin/clang-sycl-linker
             - /usr/bin/clang-tidy
             - /usr/bin/clangd
             - /usr/bin/diagtool
@@ -392,19 +637,25 @@ packages    :
             - /usr/bin/intercept-build
             - /usr/bin/modularize
             - /usr/bin/nvptx-arch
+            - /usr/bin/offload-arch
             - /usr/bin/pp-trace
             - /usr/bin/run-clang-tidy
             - /usr/bin/scan-*
             - /usr/lib/libear
             - /usr/lib/libscanbuild
-            - /usr/libexec
+            - /usr/lib/llvm/
             - /usr/share/clang/clang-format*
             - /usr/share/clang/clang-include-fixer*
-            - /usr/share/clang/clang-rename*
             - /usr/share/clang/clang-tidy-diff*
             - /usr/share/clang/run-find-all-symbols*
+            - /usr/share/clang/__pycache__/clang-format*
+            - /usr/share/clang/__pycache__/clang-include-fixer*
+            - /usr/share/clang/__pycache__/clang-tidy-diff*
+            - /usr/share/clang/__pycache__/run-find-all-symbols*
             - /usr/share/clang-doc
-            - /usr/share/man
+            - /usr/share/man/man1/diagtool*
+            - /usr/share/man/man1/extraclangtools*
+            - /usr/share/man/man1/scan-build*
             - /usr/share/scan-*
 
     - "clang-devel":
@@ -421,16 +672,217 @@ packages    :
             - /usr/lib/cmake/clang
             - /usr/lib/libclang*.so
             - /usr/include/clang*
+            - /usr/share/man/man1/clang-tblgen*
 
     - "clang-32bit":
-        summary: "Provides 32-bit object files for clang"
+        summary: "32bit build support for Clang"
         description: |
             Install this package if you need to build 32-bit binaries with Clang
+
+            This package depends on the appropriate packages for that purpose
         rundeps:
+            # GNU bits
+            - gcc-32bit
+            - libatomic-32bit
+            - libgcc-32bit-static
+            - libstdc++-32bit-devel
             - glibc-32bit-devel
-            - libcxx-32bit-devel
+
+            # LLVM toolchain bits
+            - compiler-rt-32bit # This is generally not used since we default to GCC built-ins but it is used for PGO
         paths:
-            - /usr/lib/clang/*/lib/linux/*i386*
+            - /usr/share/doc/clang-32bit/README
+
+    - "compiler-rt":
+        summary: LLVM "compiler-rt" runtime libraries
+        description: |
+            The compiler-rt project is a part of the LLVM project. It provides
+            implementation of the low-level target-specific hooks required by
+            code generation, sanitizer runtimes and profiling library for code
+            instrumentation, and Blocks C language extension.
+        paths:
+            - /usr/lib/clang/*/bin/hwasan_symbolize
+            - /usr/lib/clang/*/include/fuzzer/
+            - /usr/lib/clang/*/include/orc/
+            - /usr/lib/clang/*/include/profile/
+            - /usr/lib/clang/*/include/sanitizer/
+            - /usr/lib/clang/*/include/xray/
+            - /usr/lib/clang/*/share/*.txt
+            - /usr/lib/clang/*/lib/linux/clang_rt.*x86_64*
+            - /usr/lib/clang/*/lib/linux/libclang_rt.*x86_64*
+            - /usr/lib/clang/*/lib/linux/liborc_rt*x86_64*
+
+    - "compiler-rt-32bit":
+        summary: LLVM "compiler-rt" runtime libraries
+        description: |
+            The compiler-rt project is a part of the LLVM project. It provides
+            implementation of the low-level target-specific hooks required by
+            code generation, sanitizer runtimes and profiling library for code
+            instrumentation, and Blocks C language extension.
+        paths:
+            - /usr/lib/clang/*/lib/linux/clang_rt.*i386*
+            - /usr/lib/clang/*/lib/linux/libclang_rt.*i386*
+
+    - "flang":
+        summary: Fortran language front-end designed for integration with LLVM
+        description : |
+            Fortran language front-end designed for integration with LLVM
+        rundeps:
+            - clang
+            - lld
+            # - Do we want Polly here or is just having it as a rundep of clang sufficient?
+        paths:
+            - /usr/bin/bbc
+            - /usr/bin/f18-parse-demo
+            - /usr/bin/fir*
+            - /usr/bin/flang*
+            - /usr/bin/tco
+            - /usr/lib/clang/*/include/ISO_Fortran_binding.h
+            - /usr/lib/clang/*/lib/*/libflang_rt.runtime.a
+            - /usr/lib/libFortran*.a
+            - /usr/include/flang
+            - /usr/share/man/man1/flang*
+
+    - "libclc":
+        summary: libclc is an open source implementation of the OpenCL 1.1 Specification
+        description: |
+            libclc is an open source implementation of the OpenCL 1.1 Specification
+        paths:
+            - /usr/share/clc/*.bc
+
+    - "libclc-devel":
+        summary: libclc is an open source implementation of the OpenCL 1.1 Specification
+        description: |
+            libclc is an open source implementation of the OpenCL 1.1 Specification
+        rundeps:
+            - libclc
+        paths:
+            - /usr/share/pkgconfig/libclc.pc
+
+    - "libcxx":
+        summary: "Modern C++ standard library"
+        description: |
+            A modern C++ standard library from the LLVM project, aiming for minimal overhead
+            and compilation times. Targets the C++11 standard.
+            This is the default C++ library in Aeryn OS used in conjunction with the LLVM
+            toolchain.
+        paths:
+            - /usr/lib/libc++*.so.*
+
+    - "libcxx-32bit":
+        summary: "Modern C++ standard library (32-bit)"
+        description: |
+            Modern C++ standard library (32-bit)
+        paths:
+            - /usr/lib32/libc++*.so.*
+
+    - "libcxx-devel":
+        summary: "Development files for libcxx"
+        description: |
+            Development files for libcxx
+        paths:
+            - /usr/lib/libc++*.so
+            - /usr/lib/libc++.modules.json
+            - /usr/include/c++/
+            - /usr/share/libc++
+        rundeps:
+            - libcxx
+
+    - "libcxx-devel-static":
+        summary: "Development files for libcxx - static libraries"
+        description: |
+            Development files for libcxx - static libraries
+        paths:
+            - /usr/lib/libc++*.a
+        rundeps:
+            - libcxx-devel
+
+    - "libcxx-32bit-devel":
+        summary: "Development files for libcxx (32-bit)"
+        description: |
+            Development files for libcxx (32-bit)
+        paths:
+            - /usr/lib32/libc++*.so
+            - /usr/lib32/libc++.modules.json
+        rundeps:
+            - libcxx-32bit
+            - libcxx-devel
+
+    - "libcxx-32bit-devel-static":
+        summary: "Development files for libcxx (32-bit) - static libraries"
+        description: |
+            Development files for libcxx (32-bit) - static libraries
+        paths:
+            - /usr/lib32/libc++*.a
+        rundeps:
+            - libcxx-32bit-devel
+            - libcxx-devel-static
+
+    - "libunwind":
+        summary: LLVM libunwind
+        description: |
+            LLVM libunwind is an implementation of the interface defined by the HP libunwind
+            project. It was contributed Apple as a way to enable clang++ to port to
+            platforms that do not have a system unwinder. It is intended to be a small and
+            fast implementation of the ABI, leaving off some features of HP's libunwind
+            that never materialized (e.g. remote unwinding).
+        paths:
+            - /usr/lib/libunwind.so.*
+
+    - "libunwind-32bit":
+        summary: LLVM libunwind
+        description: |
+            LLVM libunwind is an implementation of the interface defined by the HP libunwind
+            project. It was contributed Apple as a way to enable clang++ to port to
+            platforms that do not have a system unwinder. It is intended to be a small and
+            fast implementation of the ABI, leaving off some features of HP's libunwind
+            that never materialized (e.g. remote unwinding).
+        paths:
+            - /usr/lib32/libunwind.so.*
+
+    - "libunwind-devel":
+        summary: "Development files for libunwind"
+        description: |
+            Development files for libunwind
+        paths:
+            - /usr/lib/libunwind.so
+            - /usr/lib/pkgconfig/libunwind.pc
+            - /usr/include/__libunwind_config.h
+            - /usr/include/libunwind*
+            - /usr/include/mach-o/compact_unwind_encoding.h
+            - /usr/include/unwind*.h
+        rundeps:
+            - libunwind
+
+    - "libunwind-devel-static":
+        summary: "Development files for libunwind - static libraries"
+        description: |
+            Development files for libunwind - static libraries
+        paths:
+            - /usr/lib/libunwind.a
+        rundeps:
+            - libunwind-devel
+
+    - "libunwind-32bit-devel":
+        summary: "Development files for libunwind (32-bit)"
+        description: |
+            Development files for libunwind (32-bit)
+        paths:
+            - /usr/lib32/libunwind.so
+            - /usr/lib32/pkgconfig/libunwind.pc
+        rundeps:
+            - libunwind-32bit
+            - libunwind-devel
+
+    - "libunwind-32bit-devel-static":
+        summary: "Development files for libunwind (32-bit) - static libraries"
+        description: |
+            Development files for libunwind (32-bit) - static libraries
+        paths:
+            - /usr/lib32/libunwind.a
+        rundeps:
+            - libunwind-32bit-devel
+            - libunwind-devel-static
 
     - "lld-libs":
         summary: "Library files for lld"
@@ -444,6 +896,7 @@ packages    :
         description: |
             A high-performance linker
         paths:
+            - /usr/bin/ld
             - /usr/bin/*lld*
             - /usr/bin/wasm-ld
 
@@ -459,6 +912,79 @@ packages    :
         rundeps:
             - "%(name)-devel"
             - lld
+
+    - "lldb":
+        summary: LLVM Debugger
+        description : |
+            LLDB is a next generation, high-performance debugger. It is built as a set of reusable components which highly leverage existing libraries in the larger LLVM Project, such as the Clang expression parser and LLVM disassembler.
+        paths:
+            - /usr/bin/lldb*
+            - /usr/lib/liblldb*.so.*
+            - /usr/lib/python3*/site-packages/lldb/
+
+    - "lldb-devel":
+        summary: LLVM Debugger
+        description : |
+            LLDB is a next generation, high-performance debugger. It is built as a set of reusable components which highly leverage existing libraries in the larger LLVM Project, such as the Clang expression parser and LLVM disassembler.
+        rundeps:
+            - lldb
+        paths:
+            - /usr/include/lldb/
+            - /usr/lib/liblldb*.so
+
+    - "mlir":
+        summary: Multi-Level Intermediate Representation Overview
+        description: |
+            Multi-Level Intermediate Representation Overview
+        paths:
+            - /usr/lib/libMLIR*.so.*
+            - /usr/lib/libmlir*.so.*
+
+    - "mlir-devel":
+        summary: Development files for mlir
+        description: |
+            Development files for mlir
+        paths:
+            - /usr/bin/mlir*
+            - /usr/bin/tblgen-*
+            - /usr/include/mlir
+            - /usr/include/mlir-c
+            - /usr/lib/cmake/mlir
+            - /usr/lib/libMLIR*.a
+            - /usr/lib/libMLIR*.so
+            - /usr/lib/libmlir*.so
+            - /usr/share/man/man1/mlir-tblgen*
+        rundeps:
+            - mlir
+
+    # Should this depend on openmp or the other way around? TBD I guess
+    - "offload":
+        summary: LLVM OpenMP runtime - hardware accelerator offloading
+        description: |
+            LLVM OpenMP runtime - hardware accelerator offloading support
+        rundeps:
+            - openmp
+        paths:
+            - /usr/bin/llvm-offload-device-info
+            - /usr/lib/libLLVMOffload.so.*
+            - /usr/lib/libomptarget.so.*
+
+    - "offload-devel":
+        summary: Development files for offload
+        description: |
+            Development files for offload
+        rundeps:
+            # openmp-devel? TBD
+            - offload
+        paths:
+            - /usr/bin/llvm-omp-kernel-replay
+            - /usr/include/offload
+            - /usr/lib/libLLVMOffload.so
+            - /usr/lib/amdgcn-amd-amdhsa/libomptarget-amdgpu.bc
+            - /usr/lib/amdgcn-amd-amdhsa/libompdevice.a
+            - /usr/lib/libomptarget*.bc
+            - /usr/lib/libomptarget*.a
+            - /usr/lib/libomptarget.so
 
     - "openmp":
         summary: "LLVM OpenMP runtime"
@@ -478,20 +1004,25 @@ packages    :
         paths:
             - /usr/lib/cmake/openmp
             - /usr/lib/clang/*/include/omp*.h
+            - /usr/share/gdb/python/ompd/
 
     - "polly":
         summary: "LLVM Framework for High-Level Loop and Data-Locality Optimizations"
         description: |
             LLVM Framework for High-Level Loop and Data-Locality Optimizations
         paths:
+            - /usr/lib/libPolly.so.*
             - /usr/lib/libPollyISL.so
             - /usr/lib/LLVMPolly.so
+            - /usr/share/man/man1/polly*
 
     - "polly-devel":
         summary: "LLVM Framework for High-Level Loop and Data-Locality Optimizations"
         description: |
             LLVM Framework for High-Level Loop and Data-Locality Optimizations - Development files
+        rundeps:
+            - polly
         paths:
             - /usr/include/polly
             - /usr/lib/cmake/polly
-            - /usr/lib/libPolly.a
+            - /usr/lib/libPolly.so

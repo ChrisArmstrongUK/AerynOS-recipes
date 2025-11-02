@@ -1,0 +1,38 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : kf6-kimageformats
+version     : 6.19.0
+release     : 10
+upstreams   :
+    - https://download.kde.org/stable/frameworks/6.19/kimageformats-6.19.0.tar.xz : fc825326aa6b8c1321947ff523d3d006eef4c65fde40f379c6900d06967fae1c
+homepage    : https://community.kde.org/Frameworks
+license     :
+    - GPL-2.0-only
+    - LGPL-2.0-or-later
+    - LGPL-2.1-or-later
+    - LGPL-2.1-only
+summary     : Additional image formats for Qt6/KF6
+description : |
+    Additional image formats for Qt6/KF6
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+    - cmake(KF6Archive)
+    - cmake(OpenEXR)
+    - cmake(OpenJPEG)
+    - pkgconfig(libavif)
+    - pkgconfig(libheif)
+    - pkgconfig(libjxl)
+    - pkgconfig(libraw)
+rundeps    :
+    - qt6-imageformats
+setup       : |
+    %cmake_kf6 \
+        -DKIMAGEFORMATS_HEIF=ON
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install

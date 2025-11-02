@@ -1,0 +1,29 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : kf6-kdav
+version     : 6.19.0
+release     : 5
+upstreams   :
+    - https://download.kde.org/stable/frameworks/6.19/kdav-6.19.0.tar.xz : 7753b9a87d9b5a99ffc0a8c59e98dbd66acade5729d5ae2f0a6d3fbe66ea0a92
+homepage    : https://community.kde.org/Frameworks
+license     :
+    - GPL-2.0-or-later
+    - LGPL-2.0-or-later
+summary     : DAV protocol implementation with KJobs
+description : |
+    DAV protocol implementation with KJobs
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+    - cmake(KF6CoreAddons)
+    - cmake(KF6I18n)
+    - cmake(KF6KIO)
+setup       : |
+    %cmake_kf6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install

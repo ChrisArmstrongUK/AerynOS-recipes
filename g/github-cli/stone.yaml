@@ -4,11 +4,11 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : github-cli
-version     : 2.63.2
-release     : 5
+version     : 2.79.0
+release     : 8
 homepage    : https://github.com/cli/cli
 upstreams   :
-    - https://github.com/cli/cli/archive/refs/tags/v2.63.2.tar.gz : 2578a8b1f00cb292a8094793515743f2a86e02b8d0b18d6b95959ddbeebd6b8d
+    - https://github.com/cli/cli/archive/refs/tags/v2.79.0.tar.gz : 2408f3f5d69ea7efde1f174ee058ca011b8ab24e583178c6f090f3e91767bda4
 summary     : GitHub CLI brings GitHub to your terminal
 description : |
     GitHub CLI brings GitHub to your terminal. It reduces context switching,
@@ -21,6 +21,11 @@ checkdeps   :
 rundeps     :
     - binary(xdg-open)  # For opening browser
 networking  : true
+setup       : |
+    go mod vendor
+build       : |
+    env GH_VERSION=%(version) \
+        %make bin/gh manpages completions
 install     : |
     %make_install prefix=/usr
 check       : |

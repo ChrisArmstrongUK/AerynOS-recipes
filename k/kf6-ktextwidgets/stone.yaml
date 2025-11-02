@@ -4,10 +4,10 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : kf6-ktextwidgets
-version     : 6.12.0
-release     : 3
+version     : 6.19.0
+release     : 11
 upstreams   :
-    - https://download.kde.org/stable/frameworks/6.12/ktextwidgets-6.12.0.tar.xz : 698e2be7fc6fd27b4aa4c192a1ab0b0abc08121639775c4ff4f4b4c81d8f041d
+    - https://download.kde.org/stable/frameworks/6.19/ktextwidgets-6.19.0.tar.xz : d9fa49ee95cf03321d2b2d89bd6952734323b75a2d983b97702d14bce4809f16
 homepage    : https://community.kde.org/Frameworks
 license     :
     - LGPL-2.0-only
@@ -19,7 +19,6 @@ description : |
 builddeps   :
     # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
     - cmake(ECM)
-    - cmake(KF6ColorScheme)
     - cmake(KF6Completion)
     - cmake(KF6Config)
     - cmake(KF6ConfigWidgets)

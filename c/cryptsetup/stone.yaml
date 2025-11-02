@@ -4,11 +4,11 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : cryptsetup
-version     : 2.7.4
-release     : 3
+version     : 2.8.1
+release     : 9
 homepage    : https://gitlab.com/cryptsetup/cryptsetup
 upstreams   :
-    - https://gitlab.com/cryptsetup/cryptsetup/-/archive/v2.7.4/cryptsetup-v2.7.4.tar.gz : 5f61f1214f53ee0f220fd2bf3cc65e656a8a777c4adb09bc76a8ae8cec262611
+    - https://gitlab.com/cryptsetup/cryptsetup/-/archive/v2.8.1/cryptsetup-v2.8.1.tar.gz : f422d3a0efbdd5792c88e9e10b6c495edcc60fce74fe2f340febb98590560c9e
 summary     : cryptsetup + LUKS
 description : |
     cryptsetup + LUKS - open source disk encryption
@@ -17,6 +17,7 @@ license     :
     - GPL-2.0-or-later
     - LGPL-2.1-or-later
 builddeps   :
+    - binary(asciidoctor)
     - binary(gettext)
     - pkgconfig(blkid)
     - pkgconfig(devmapper)
@@ -30,19 +31,50 @@ builddeps   :
     - pkgconfig(systemd)
     - pkgconfig(uuid)
 setup       : |
-    %meson -Dasciidoc=disabled \
-           -Dargon-implementation=internal \
-           -Dinternal-sse-argon2=true \
-           -Dc_link_args='-Wl,--undefined-version'
-           # without ^, the build fails because LLVM 16+ sets
-           # '--no-undefined-version' by default; see also:
-           # https://gitlab.com/cryptsetup/cryptsetup/-/merge_requests/691
+    %patch %(pkgdir)/0001-meson-Install-binaries.patch
+    %patch %(pkgdir)/0001-Fix-lockdir-perms.patch
+
+    %meson \
+        -Dargon-implementation=internal \
+        -Dinternal-sse-argon2=true \
+        -Dssh-token=true
 build       : |
     %meson_build
 install     : |
     %meson_install
-    # The install script apparently doesn't install the executables?!
-    for exe in $(find -name '*setup' -type f -executable); do
-        %install_bin ${exe}
-    done
-    rm -v %(installroot)%(libdir)/tmpfiles.d -rf
+packages    :
+    - "%(name)-libs":
+        summary: "Library files for %(name)"
+        description: |
+            Library files for %(name), typically pulled in as a dependency of another package.
+        paths:
+            - /usr/lib/libcryptsetup.so.*
+            - /usr/lib/tmpfiles.d/cryptsetup.conf
+            - /usr/share/locale/
+
+    - "%(name)-ssh-token":
+        summary: Cryptsetup LUKS2 SSH token
+        description: |
+            This package contains the LUKS2 SSH token.
+        paths:
+            - /usr/sbin/cryptsetup-ssh
+            - /usr/lib/cryptsetup/libcryptsetup-token-ssh.so
+            - /usr/share/man/man8/cryptsetup-ssh.8*
+
+    - "integritysetup":
+        summary: A utility for setting up dm-integrity volumes
+        description: |
+            The integritysetup package contains a utility for setting up
+            disk integrity protection using dm-integrity kernel module.
+        paths:
+            - /usr/sbin/integritysetup
+            - /usr/share/man/man8/integritysetup.8*
+
+    - "veritysetup":
+        summary: A utility for setting up dm-verity volumes
+        description: |
+            The veritysetup package contains a utility for setting up
+            disk verification using dm-verity kernel module.
+        paths:
+            - /usr/sbin/veritysetup
+            - /usr/share/man/man8/veritysetup.8*

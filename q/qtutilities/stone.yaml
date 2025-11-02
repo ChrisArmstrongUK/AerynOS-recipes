@@ -1,0 +1,40 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : qtutilities
+version     : 6.18.2
+release     : 4
+upstreams   :
+    - https://github.com/Martchus/qtutilities/archive/refs/tags/v6.18.2.tar.gz : 5abe8f71bcca527dc499ee94c2e28c01fa0ecaeb67b571da8bec62701d089dda
+homepage    : https://github.com/Martchus/qtutilities 
+license     : GPL-2.0-or-later 
+summary     : Common Qt related C++ classes and routines used by Martchus applications such as dialogs, widgets and models
+description : |
+    Common Qt related C++ classes and routines used by Martchus applications such as dialogs, widgets and models
+builddeps   :
+    - binary(doxygen)
+    - cmake(Qt6Gui)
+    - cmake(Qt6LinguistTools)
+    - cmake(c++utilities)
+    - pkgconfig(x11)
+setup       : |
+    %cmake \
+        -DBUILD_SHARED_LIBS:BOOL=ON \
+        -DBUILTIN_TRANSLATIONS=ON \
+        -DCONFIGURATION_NAME=qt6 \
+        -DCONFIGURATION_TARGET_SUFFIX=qt6 \
+        -DQT_PACKAGE_PREFIX=Qt6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install
+check       : |
+    # Odd, but whatever I guess
+    # https://github.com/Martchus/cpp-utilities/issues/26
+    env QT_QPA_PLATFORM=offscreen %cmake_build --target check
+packages    :
+    - "%(name)-devel":
+        paths:
+            - /usr/share/qtutilities-qt6/

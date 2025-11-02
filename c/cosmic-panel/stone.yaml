@@ -4,23 +4,20 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : cosmic-panel
-version     : 1.0.0-alpha.6
-release     : 14
+version     : 1.0.0-beta3+git.f1a9476
+release     : 21
 summary     : Cosmic Desktop Panel
 license     : GPL-3.0
 homepage    : https://github.com/pop-os/cosmic-panel
 upstreams   :
-    - git|https://github.com/pop-os/cosmic-panel.git : dc429bc571393624a72ce91c6dd864849c3812ae
+    - git|https://github.com/pop-os/cosmic-panel.git : f1a947605243a79c4a4a0813fa234fa21440c859
 description : |
     Cosmic Desktop panel
 builddeps   :
-    - binary(cargo)
     - binary(just)
     - pkgconfig(xkbcommon)
 rundeps     :
     - binary(cosmic-applets)
-tuning      :
-    - lto: thin
 networking  : yes
 setup       : |
     %cargo_fetch

@@ -23,7 +23,6 @@
 				"/usr/lib/girepository-1.0/GSound-1.0.typelib",
 				"/usr/lib/libgsound.so.0",
 				"/usr/lib/libgsound.so.0.0.2",
-				"/usr/share/gir-1.0/GSound-1.0.gir",
 				"/usr/share/vala/vapi/gsound.deps",
 				"/usr/share/vala/vapi/gsound.vapi"
 			],
@@ -42,6 +41,7 @@
 				"pkgconfig(libcanberra)"
 			],
 			"depends": [
+				"gsound",
 				"pkgconfig(gio-2.0)",
 				"pkgconfig(gobject-2.0)",
 				"pkgconfig(libcanberra)"
@@ -51,7 +51,8 @@
 				"/usr/include/gsound-context.h",
 				"/usr/include/gsound.h",
 				"/usr/lib/libgsound.so",
-				"/usr/lib/pkgconfig/gsound.pc"
+				"/usr/lib/pkgconfig/gsound.pc",
+				"/usr/share/gir-1.0/GSound-1.0.gir"
 			],
 			"name": "gsound-devel",
 			"provides": [
@@ -60,6 +61,6 @@
 		}
 	},
 	"source-name": "gsound",
-	"source-release": "1",
+	"source-release": "4",
 	"source-version": "1.0.3"
 }

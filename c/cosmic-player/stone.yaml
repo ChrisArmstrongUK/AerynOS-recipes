@@ -4,24 +4,24 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : cosmic-player
-version     : 1.0.0-alpha.6
-release     : 2
-summary     : Cosmic Desktop Compositor
+version     : 1.0.0-beta3+git.e9beecc
+release     : 10
+summary     : COSMIC media player
 license     : GPL-3.0
 homepage    : https://github.com/pop-os/cosmic-player
 upstreams   :
-    - git|https://github.com/pop-os/cosmic-player.git : 5796e09704e6039544207ecde411a0d2492abc58
+    - git|https://github.com/pop-os/cosmic-player.git : e9beecc1bfb7066a7712c8cb51274cd2efddad8f
 description : |
     Cosmic Desktop Media Player
 builddeps   :
-    - binary(cargo)
     - binary(just)
     - pkgconfig(gstreamer-1.0)
     - pkgconfig(gstreamer-plugins-base-1.0)
     - pkgconfig(xkbcommon)
+rundeps     :
+    # Moss upgrade bug
+    - gstreamer-plugins-good
 networking  : yes
-tuning      :
-    - lto: thin
 setup       : |
     %cargo_fetch
 build       : |

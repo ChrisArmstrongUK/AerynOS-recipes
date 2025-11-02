@@ -4,11 +4,11 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : python-trove-classifiers
-version     : 2024.9.12
-release     : 3
+version     : 2025.5.9.12
+release     : 6
 homepage    : https://pypi.org/project/trove-classifiers
 upstreams   :
-    - https://files.pythonhosted.org/packages/source/t/trove_classifiers/trove_classifiers-2024.9.12.tar.gz : 4b46b3e134a4d01999ac5bc6e528afcc10cc48f0f724f185f267e276005768f4
+    - https://pypi.debian.net/trove-classifiers/trove_classifiers-2025.5.9.12.tar.gz : 7ca7c8a7a76e2cd314468c677c69d12cc2357711fcab4a60f87994c1589e5cb5
 summary     : Canonical source for classifiers on PyPI.
 description : |
     Classifiers categorize projects per PEP 301. Use this package to validate classifiers in packages for PyPI upload or download.
@@ -16,9 +16,16 @@ license     :
     - Apache-2.0
 builddeps   :
     - python(calver)
+    - python(setuptools)
 rundeps     :
     - binary(python3)
+checkdeps   :
+    - python(pytest)
 build       : |
     %pyproject_build
 install     : |
     %pyproject_install
+check       : |
+    # TODO replace with pytest macro
+    # test_cli tests that the binary works, and I'm not sure how to point it to the path of the binary we just built
+    PYTHONPATH="$PWD"/build/lib pytest -k 'not test_cli'

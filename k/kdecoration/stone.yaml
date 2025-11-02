@@ -1,0 +1,28 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : kdecoration
+version     : 6.5.1
+release     : 9
+upstreams   :
+    - https://download.kde.org/stable/plasma/6.5.1/kdecoration-6.5.1.tar.xz : b59402d23bfc996a575af53f693977846c97f6c1a9c934afa95ac2cefd358c24
+homepage    : https://kde.org/plasma-desktop/
+license     : LGPL-2.1-only
+summary     : Plugin based library to create window decorations
+description : |
+    Plugin based library to create window decorations
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+    - cmake(KF6I18n)
+tuning      :
+    - lto: full
+    - optimize: speed
+setup       : |
+    %cmake_kf6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install

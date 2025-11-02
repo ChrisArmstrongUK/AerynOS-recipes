@@ -1,0 +1,43 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : kf6-kdesu
+version     : 6.19.0
+release     : 5
+upstreams   :
+    - https://download.kde.org/stable/frameworks/6.19/kdesu-6.19.0.tar.xz : 02f92edf906a397b05554ff4bd671cd7f5ac6c2cef56732541a2c27cc03d209f
+homepage    : https://community.kde.org/Frameworks
+license     :
+    - GPL-2.0-only
+    - LGPL-2.0-or-later
+    - LGPL-2.1-only
+summary     : User interface for running shell commands with root privileges
+description : |
+    User interface for running shell commands with root privileges
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+    - cmake(KF6Config)
+    - cmake(KF6CoreAddons)
+    - cmake(KF6I18n)
+    - cmake(KF6Pty)
+    - pkgconfig(x11)
+rundeps     :
+    - binary(sudo)
+setup       : |
+    %cmake_kf6 \
+        -DKDESU_USE_SUDO_DEFAULT=ON
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install
+packages    :
+    - "%(name)":
+        rundeps:
+            - binary(sudo)
+    
+    - "%(name)-devel":
+        rundeps:
+            - cmake(KF6Pty)

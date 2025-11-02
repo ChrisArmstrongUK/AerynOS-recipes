@@ -8,7 +8,7 @@
 			],
 			"files": [
 				"/usr/lib/libmimalloc.so.2",
-				"/usr/lib/libmimalloc.so.2.1"
+				"/usr/lib/libmimalloc.so.2.2"
 			],
 			"name": "mimalloc",
 			"provides": [
@@ -22,6 +22,7 @@
 			"files": [
 				"/usr/include/mimalloc-new-delete.h",
 				"/usr/include/mimalloc-override.h",
+				"/usr/include/mimalloc-stats.h",
 				"/usr/include/mimalloc.h",
 				"/usr/lib/cmake/mimalloc/mimalloc-config-version.cmake",
 				"/usr/lib/cmake/mimalloc/mimalloc-config.cmake",
@@ -35,9 +36,18 @@
 				"cmake(mimalloc)",
 				"pkgconfig(mimalloc)"
 			]
+		},
+		"mimalloc-static": {
+			"depends": [
+				"mimalloc-devel"
+			],
+			"files": [
+				"/usr/lib/libmimalloc.a"
+			],
+			"name": "mimalloc-static"
 		}
 	},
 	"source-name": "mimalloc",
-	"source-release": "5",
-	"source-version": "2.1.7"
+	"source-release": "9",
+	"source-version": "2.2.4"
 }

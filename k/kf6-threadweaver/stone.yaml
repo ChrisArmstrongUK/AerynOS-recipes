@@ -1,0 +1,24 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : kf6-threadweaver
+version     : 6.19.0
+release     : 6
+upstreams   :
+    - https://download.kde.org/stable/frameworks/6.19/threadweaver-6.19.0.tar.xz : d8d4d0b6e62b067a8ce4fed7aefeed02ed43a43f97f085db3baedf9210070da1
+homepage    : https://community.kde.org/Frameworks
+license     : LGPL-2.0-or-later
+summary     : Helper for multithreaded programming
+description : |
+    Helper for multithreaded programming
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+setup       : |
+    %cmake_kf6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install

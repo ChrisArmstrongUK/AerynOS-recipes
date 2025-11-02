@@ -4,10 +4,10 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : kf6-kio
-version     : 6.12.0
-release     : 5
+version     : 6.19.0
+release     : 18
 upstreams   :
-    - https://download.kde.org/stable/frameworks/6.12/kio-6.12.0.tar.xz : 1581e4f885750f08a3134fad47b81e953556e3fc94028939b47ffae0ab432eee
+    - https://download.kde.org/stable/frameworks/6.19/kio-6.19.0.tar.xz : 06de4ce5c91aac91a127c50bd9caad6fbdef26c6c86164ed28a546a8e4cf0567
 homepage    : https://community.kde.org/Frameworks
 license     :
     - GPL-2.0-only
@@ -42,10 +42,13 @@ builddeps   :
     - cmake(KF6Solid)
     - cmake(KF6Wallet)
     - cmake(KF6WindowSystem)
+    - cmake(Qt6CorePrivate)
     - pkgconfig(libacl)
     - pkgconfig(libattr)
     - pkgconfig(libxslt)
+    - pkgconfig(mount)
 setup       : |
+    %patch %(pkgdir)/upstream-2022.patch
     %cmake_kf6
 build       : |
     %cmake_build

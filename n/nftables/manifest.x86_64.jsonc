@@ -9,7 +9,8 @@
 				"pkgconfig(jansson)",
 				"pkgconfig(libmnl)",
 				"pkgconfig(libnftnl)",
-				"pkgconfig(readline)"
+				"pkgconfig(readline)",
+				"python(setuptools)"
 			],
 			"depends": [
 				"interpreter(/usr/lib/ld-linux-x86-64.so.2(x86_64))",
@@ -24,9 +25,10 @@
 				"/usr/lib/libnftables.so.1",
 				"/usr/lib/libnftables.so.1.1.0",
 				"/usr/sbin/nft",
-				"/usr/share/defaults/etc/nftables/osf/pf.os",
+				"/usr/share/defaults/nftables/osf/pf.os",
 				"/usr/share/man/man5/libnftables-json.5",
 				"/usr/share/man/man8/nft.8",
+				"/usr/share/man/man8/nftables.service.8",
 				"/usr/share/nftables/all-in-one.nft",
 				"/usr/share/nftables/arp-filter.nft",
 				"/usr/share/nftables/bridge-filter.nft",
@@ -55,7 +57,8 @@
 				"pkgconfig(jansson)",
 				"pkgconfig(libmnl)",
 				"pkgconfig(libnftnl)",
-				"pkgconfig(readline)"
+				"pkgconfig(readline)",
+				"python(setuptools)"
 			],
 			"depends": [
 				"nftables"
@@ -78,13 +81,15 @@
 				"pkgconfig(jansson)",
 				"pkgconfig(libmnl)",
 				"pkgconfig(libnftnl)",
-				"pkgconfig(readline)"
+				"pkgconfig(readline)",
+				"python(setuptools)"
 			],
 			"files": [
 				"/usr/share/doc/nftables/examples/ct_helpers.nft",
 				"/usr/share/doc/nftables/examples/load_balancing.nft",
 				"/usr/share/doc/nftables/examples/secmark.nft",
-				"/usr/share/doc/nftables/examples/sets_and_maps.nft"
+				"/usr/share/doc/nftables/examples/sets_and_maps.nft",
+				"/usr/share/doc/nftables/main.nft"
 			],
 			"name": "nftables-docs"
 		},
@@ -95,10 +100,12 @@
 				"pkgconfig(jansson)",
 				"pkgconfig(libmnl)",
 				"pkgconfig(libnftnl)",
-				"pkgconfig(readline)"
+				"pkgconfig(readline)",
+				"python(setuptools)"
 			],
 			"depends": [
-				"binary(python3)"
+				"nftables",
+				"python-libs"
 			],
 			"files": [
 				"/usr/lib/python3.11/site-packages/nftables-0.1.dist-info/METADATA",
@@ -115,12 +122,11 @@
 			],
 			"name": "python-nftables",
 			"provides": [
-				"python(nftables(3.11))",
 				"python(nftables)"
 			]
 		}
 	},
 	"source-name": "nftables",
-	"source-release": "5",
-	"source-version": "1.1.1"
+	"source-release": "9",
+	"source-version": "1.1.5"
 }

@@ -1,0 +1,30 @@
+#
+# SPDX-FileCopyrightText: © 2020-2024 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : qt6-webchannel
+version     : 6.9.3
+release     : 4
+homepage    : https://www.qt.io
+upstreams   :
+    - https://download.qt.io/official_releases/qt/6.9/6.9.3/submodules/qtwebchannel-everywhere-src-6.9.3.tar.xz : 9457bbc1e5a13d9cf277c1fc121cdeb0a21546abf7fba091779b7ce9806fa305
+summary     : Qt6 Webchannel Module
+description : |
+    The Qt WebChannel module offers Qt applications a seamless way to publish QObjects for interaction with HTML/JavaScript clients. These clients can either be inside local Qt WebViews or any other, potentially remote, client which supports JavaScript, as long as a communication channel such as WebSocket is available.
+
+    Qt WebChannel uses introspection on the QObjects and sends this serialized data to the clients. There, with the help of a small JavaScript library, an object is created which simulates the API of the QObject. Any invokable methods, including slots, can be called as well as properties read and written. Additionally you can connect to signals and register JavaScript callbacks as handlers.
+license     :
+    - GFDL-1.3-or-later
+    - GPL-3.0-or-later
+    - LGPL-3.0-or-later
+builddeps   :
+    - cmake(Qt6CorePrivate)
+    - cmake(Qt6Quick)
+    - cmake(Qt6WebSockets)
+setup       : |
+    %cmake_qt6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install

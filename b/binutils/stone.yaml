@@ -4,16 +4,16 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : binutils
-version     : 2.43.0+git.5f8987d3
-release     : 15
+version     : 2.45+git.d5945a22
+release     : 25
 summary     : A GNU collection of binary utilities
 license     : GPL-3.0-or-later
 homepage    : https://sourceware.org/binutils
 description : |
     A GNU collection of binary utilities
 upstreams   :
-    # binutils-2_43-branch
-    - git|https://sourceware.org/git/binutils-gdb.git : 5f8987d3999edb26e757115fe87be55787d510b9
+    # binutils-2_45-branch
+    - git|https://sourceware.org/git/binutils-gdb.git : d5945a221ff70ca60e78d0e8a7e3b0671414ec58
 builddeps   :
     - binary(bison)
     - binary(flex)
@@ -22,16 +22,21 @@ builddeps   :
     - binary(makeinfo)
     - binary(msgmerge)
     - binary(perl)
+    - binary(tar)
     - binary(yacc)
     - pkgconfig(jansson)
     - pkgconfig(libblake3)
+    - pkgconfig(libxxhash) # Not actually used but it gets past a configure error
     - pkgconfig(libzstd)
     - pkgconfig(ncursesw)
-    - pkgconfig(readline)
+    # - pkgconfig(readline)
     - pkgconfig(zlib)
 setup       : |
     %patch %(pkgdir)/0001-Proper-stateless.patch
     %patch %(pkgdir)/0001-Use-BLAKE3-for-build-id-hashing.patch
+
+    # Seems to be a bashism or automake regression, causes the literal binary `/usr/bin/gp-{archive,collect-app,display-html,display-src,display-text}` to be created
+    %patch %(pkgdir)/0001-Revert-gprofng-Fix-cross-compilation-binary-name.patch
 
     # Non release builds mess up the sonames
     sed -i '/^development=/s/true/false/' bfd/development.sh
@@ -41,6 +46,7 @@ setup       : |
         --disable-gdb \
         --disable-gdbserver \
         --disable-libdecnumber \
+        --disable-readline \
         --disable-rpath \
         --disable-sim \
         --disable-static \
@@ -63,8 +69,7 @@ setup       : |
         --enable-threads \
         --with-lib-path="/usr/lib:/usr/lib32" \
         --with-blake3=yes \
-        --with-system-readline \
-        --with-system-zlib \
+        --with-xxhash=yes \
         --with-zstd=yes \
         --without-debuginfod
 build       : |
@@ -72,6 +77,9 @@ build       : |
 install     : |
     %make_install tooldir=/usr -C %(builddir)
     rm -f %(installroot)/usr/share/info/dir
+
+    # Default ld is provided by lld
+    rm -v %(installroot)%(bindir)/ld
 
     # Stateless
     %install_dir %(installroot)/usr/share/defaults/gprofng
@@ -83,3 +91,30 @@ tuning      :
     - nosemantic
     - optimize: speed
     - symbolic
+packages    :
+    - "%(name)-libs":
+        summary: "Library files for %(name)"
+        description: |
+            Library files for %(name), typically pulled in as a dependency of another package.
+        paths:
+            - /usr/lib/libbfd-*.so
+            - /usr/lib/libopcodes-*.so
+            - /usr/lib/libsframe.so.*
+
+    - "%(name)-gprofng":
+        summary: Next Generation code profiling tool
+        description: Next Generation code profiling tool
+        paths:
+            - /usr/bin/gp-*
+            - /usr/bin/gprof*
+            - /usr/lib/gprofng
+            - /usr/lib/libgprofng.so.*
+            - /usr/share/defaults/gprofng
+            - /usr/share/doc/gprofng
+            - /usr/share/info/gprof*.info
+            - /usr/share/locale/**/**/gprof.mo
+            - /usr/share/man/man1/gprof*
+
+    - "%(name)-devel":
+        rundeps:
+            - "%(name)-gprofng"

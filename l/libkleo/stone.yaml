@@ -1,0 +1,40 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : libkleo
+version     : 25.08.2
+release     : 9
+upstreams   :
+    - https://download.kde.org/stable/release-service/25.08.2/src/libkleo-25.08.2.tar.xz : bc6b963644d4c7c00002da0df143c8cdeda4d3f12eb1409b67212fabdde0d7b8
+homepage    : https://kde.org
+license     : GPL-2.0-or-later
+summary     : KDE PIM cryptographic library
+description : |
+    KDE PIM cryptographic library.
+builddeps   :
+    - cmake(Boost)
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+    - cmake(KF6Codecs)
+    - cmake(KF6ColorScheme)
+    - cmake(KF6Completion)
+    - cmake(KF6Config)
+    - cmake(KF6CoreAddons)
+    - cmake(KF6I18n)
+    - cmake(KF6ItemModels)
+    - cmake(KF6WidgetsAddons)
+    - cmake(QGpgmeQt6)
+setup       : |
+    %cmake_kf6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install
+packages    :
+    - "%(name)-devel":
+        rundeps:
+            - cmake(QGpgmeQt6)
+        paths:
+            - /usr/share/KPim6Libkleo/

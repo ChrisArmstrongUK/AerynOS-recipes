@@ -29,7 +29,7 @@
 			],
 			"depends": [
 				"graphite",
-				"soname(libc.so.6(x86))"
+				"soname(libc.so.6(386))"
 			],
 			"files": [
 				"/usr/lib32/libgraphite2.so.3",
@@ -37,8 +37,7 @@
 			],
 			"name": "graphite-32bit",
 			"provides": [
-				"soname(libgraphite2.so.3(386))",
-				"soname(libgraphite2.so.3(x86))"
+				"soname(libgraphite2.so.3(386))"
 			]
 		},
 		"graphite-32bit-devel": {
@@ -82,6 +81,6 @@
 		}
 	},
 	"source-name": "graphite",
-	"source-release": "4",
+	"source-release": "8",
 	"source-version": "1.3.14"
 }

@@ -5,7 +5,7 @@
 #
 name        : build-essential
 version     : 0
-release     : 3
+release     : 7
 summary     : Essential build tools for AerynOS
 license     : MPL-2.0
 homepage    : https://github.com/AerynOS
@@ -15,7 +15,7 @@ rundeps     :
     - binary(bc)
     - binary(bison)
     - binary(bunzip2)
-    - binary(cc)
+    # - binary(cc)
     - binary(clang)
     - binary(clang++)
     - binary(cpio)
@@ -23,7 +23,9 @@ rundeps     :
     - binary(flex)
     - binary(g++)
     - binary(gcc)
-    - binary(ld)
+    - binary(just)
+    # - binary(ld)
+    - binary(ld.bfd)
     - binary(ld.lld)
     - binary(make)
     - binary(patch)
@@ -37,6 +39,7 @@ rundeps     :
     - pkgconfig(libssl)
     - pkgconfig(libxcrypt)
     - pkgconfig(ncurses)
+    - python(ruamel-yaml)
     - glibc-devel
     - layout
     - linux-headers

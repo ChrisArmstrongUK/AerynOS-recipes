@@ -1,0 +1,30 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : ocean-sound-theme
+version     : 6.5.1
+release     : 7
+upstreams   :
+    - https://download.kde.org/stable/plasma/6.5.1/ocean-sound-theme-6.5.1.tar.xz : be770b8ed39a77d6444ba5f0a6403720338e8aee438d11a70cc7f087bdc8c6a8
+homepage    : https://kde.org/plasma-desktop/
+license     :
+    - BSD-2-Clause
+    - CC-BY-SA-4.0
+    - CC0-1.0
+summary     : Ocean Sound Theme for Plasma
+description : |
+    Ocean Sound Theme for Plasma
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+tuning      :
+    - lto: full
+    - optimize: speed
+setup       : |
+    %cmake_kf6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install

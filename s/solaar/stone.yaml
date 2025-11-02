@@ -1,0 +1,24 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : solaar
+version     : 1.1.16
+release     : 2
+upstreams   :
+    - https://github.com/pwr-Solaar/Solaar/archive/refs/tags/1.1.16.tar.gz : 224cb48f8370d477e60c96c5c9b6f45cabe9f1655b629af661a0377814f3d703
+homepage    : https://pwr-solaar.github.io/Solaar/
+license     : GPL-2.0-or-later
+summary     : Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
+description : |
+    Solaar is a Linux device manager for Logitech's Unifying Receiver peripherals.
+builddeps   :
+    - python(setuptools)
+rundeps     :
+    - binary(python3)
+    - libayatana-appindicator
+build       : |
+    %pyproject_build
+install     : |
+    %pyproject_install

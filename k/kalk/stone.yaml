@@ -1,0 +1,44 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : kalk
+version     : 25.08.2
+release     : 8
+upstreams   :
+    - https://download.kde.org/stable/release-service/25.08.2/src/kalk-25.08.2.tar.xz : f439627aa0980290a2bbf78b61b1a03d38b7de1c1aaa71708867bb5edd7dd083
+homepage    : https://apps.kde.org/kalk/
+license     :
+    - BSD-2-Clause
+    - BSD-3-Clause
+    - CC0-1.0
+    - GPL-2.0-or-later
+    - GPL-3.0-or-later
+summary     : Convergent calculator for Plasma
+description : |
+    Convergent calculator for Plasma
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+    - cmake(KF6Config)
+    - cmake(KF6CoreAddons)
+    - cmake(KF6I18n)
+    - cmake(KF6Kirigami)
+    - cmake(KF6UnitConversion)
+    - cmake(Qt6CorePrivate)
+    - cmake(Qt6Qml)
+    - pkgconfig(libqalculate)
+rundeps     :
+    - kf6-kirigami
+    - kf6-kirigami-addons
+    - kf6-qqc2-desktop-style
+    - kf6-sonnet
+    - qt6-5compat
+    - qt6-wayland
+setup       : |
+    %cmake_kf6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install

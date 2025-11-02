@@ -1,0 +1,39 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : ksshaskpass
+version     : 6.5.1
+release     : 7
+upstreams   :
+    - https://download.kde.org/stable/plasma/6.5.1/ksshaskpass-6.5.1.tar.xz : 6a86d6eb8a2e721875700bfe7264fddfa7bdef71d125abd8a0fcd161740874ce
+homepage    : https://kde.org/plasma-desktop/
+license     : GPL-2.0-or-later
+summary     : Front-end for ssh-add which stores the password of the ssh key in KWallet
+description : |
+    Front-end for ssh-add which stores the password of the ssh key in KWallet.
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+    - cmake(KF6CoreAddons)
+    - cmake(KF6DocTools)
+    - cmake(KF6I18n)
+    - cmake(KF6Wallet)
+    - cmake(KF6WidgetsAddons)
+rundeps     :
+    - binary(ssh-add)
+    - binary(ssh-agent)
+tuning      :
+    - lto: full
+    - optimize: speed
+setup       : |
+    %cmake_kf6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install
+
+    %install_file %(pkgdir)/ksshaskpass.env %(installroot)%(datadir)/xdg/plasma-workspace/env/ksshaskpass.sh
+
+    # TODO: Needs to be rebuilt once we support capabilities

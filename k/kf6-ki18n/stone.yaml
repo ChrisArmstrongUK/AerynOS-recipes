@@ -4,10 +4,10 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : kf6-ki18n
-version     : 6.12.0
-release     : 3
+version     : 6.19.0
+release     : 14
 upstreams   :
-    - https://download.kde.org/stable/frameworks/6.12/ki18n-6.12.0.tar.xz : cd1adbcde1badfb7ac8945c3c0a9afc02b2ed642c769d74e1bcb70a02d070dc5
+    - https://download.kde.org/stable/frameworks/6.19/ki18n-6.19.0.tar.xz : 608ff2634cd19736a8091c750c71b23db0b33fd81e82fb9fc4bcce76712284a6
 homepage    : https://community.kde.org/Frameworks
 license     :
     - BSD-3-Clause
@@ -21,6 +21,7 @@ builddeps   :
     - binary(msgmerge) # gettext
     # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
     - cmake(ECM)
+    - cmake(Qt6CorePrivate)
     - cmake(Qt6Qml)
     - pkgconfig(iso-codes)
 rundeps     :

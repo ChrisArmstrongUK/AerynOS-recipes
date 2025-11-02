@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: MPL-2.0
 #
 name        : glibc
-version     : 2.40+git.7648e3c8
-release     : 16
+version     : 2.42+git.e87844ec
+release     : 29
 summary     : The GNU libc libraries
 license     :
     - GPL-2.0-or-later
@@ -15,7 +15,7 @@ homepage    : https://www.gnu.org/software/libc
 description : |
     The GNU libc libraries
 upstreams   :
-    - git|https://sourceware.org/git/glibc.git: 7648e3c8e80b3f1b3b43506b2fbe370e4824ab97
+    - git|https://sourceware.org/git/glibc.git: e87844ec42b77363a499ea4da6c4a6ab85eba310
 builddeps   :
     - binary(bison)
     - binary(gperf)
@@ -25,22 +25,8 @@ builddeps   :
     - binary(msgfmt)
     - binary(patch)
     - binary(python3)
+    - binary(zstd)
     - gcc-32bit
-packages    :
-    - "%(name)-devel":
-        paths:
-            - /usr/bin/mtrace
-            - /usr/bin/pcprofiledump
-            - /usr/bin/xtrace
-            - /usr/lib/*.o
-            - /usr/lib/libc_malloc_debug.so.0
-    - "%(name)-32bit":
-        paths:
-            - /usr/lib/ld-linux.so.2
-    - "%(name)-32bit-devel":
-        paths:
-            - /usr/lib32/*.o
-            - /usr/lib32/libc_malloc_debug.so.0
 toolchain   : gnu
 emul32      : true
 tuning      :
@@ -50,13 +36,16 @@ tuning      :
     - bindnow: false
     - fortify: false
     - harden: false
+    - lto: false
     - optimize: speed
     - symbolic: nonweak
 environment : |
+    # TODO: Enable sframe once LLVM supports it
     export COMMON_GLIBC_OPTIONS="\
         %(options_configure) \
                 --disable-build-nscd \
                 --disable-nscd \
+                --disable-sframe \
                 --enable-bind-now \
                 --enable-kernel=5.15 \
                 --enable-multi-arch \
@@ -65,9 +54,10 @@ environment : |
     "
 setup       : |
     %patch %(pkgdir)/perf/0001-Remove-RELR-dependency-check.patch
-    %patch %(pkgdir)/serpent/0001-sysdeps-Add-support-for-default-directories.patch
-    %patch %(pkgdir)/serpent/0001-Force-correct-RTLDLIST-for-ldd.patch
-    %patch %(pkgdir)/serpent/0001-Compress-charmaps-with-zstd.patch
+    %patch %(pkgdir)/aerynos/0001-sysdeps-Add-support-for-default-directories.patch
+    %patch %(pkgdir)/aerynos/0001-Force-correct-RTLDLIST-for-ldd.patch
+    %patch %(pkgdir)/aerynos/0001-Compress-charmaps-with-zstd.patch
+    %patch %(pkgdir)/aerynos/0001-downstream-Update-default-PATH.patch
     %patch %(pkgdir)/stateless/make-hosts-file-stateless.patch
     %patch %(pkgdir)/stateless/Support-fallback-stateless-shells-path.patch
     %patch %(pkgdir)/stateless/Use-a-stateless-ld.so.conf.patch
@@ -119,9 +109,10 @@ profiles    :
     - emul32:
         setup: |
             %patch %(pkgdir)/perf/0001-Remove-RELR-dependency-check.patch
-            %patch %(pkgdir)/serpent/0001-sysdeps-Add-support-for-default-directories.patch
-            %patch %(pkgdir)/serpent/0001-Force-correct-RTLDLIST-for-ldd.patch
-            %patch %(pkgdir)/serpent/0001-Compress-charmaps-with-zstd.patch
+            %patch %(pkgdir)/aerynos/0001-sysdeps-Add-support-for-default-directories.patch
+            %patch %(pkgdir)/aerynos/0001-Force-correct-RTLDLIST-for-ldd.patch
+            %patch %(pkgdir)/aerynos/0001-Compress-charmaps-with-zstd.patch
+            %patch %(pkgdir)/aerynos/0001-downstream-Update-default-PATH.patch
             %patch %(pkgdir)/stateless/make-hosts-file-stateless.patch
             %patch %(pkgdir)/stateless/Support-fallback-stateless-shells-path.patch
             %patch %(pkgdir)/stateless/Use-a-stateless-ld.so.conf.patch
@@ -154,3 +145,24 @@ profiles    :
             # Support old compiled 32bit binaries
             %install_dir %(installroot)/usr/lib
             ln -sv ../lib32/ld-linux.so.2 %(installroot)/usr/lib/ld-linux.so.2
+packages    :
+    - "%(name)":
+        rundeps:
+            - iana-etc
+
+    - "%(name)-devel":
+        paths:
+            - /usr/bin/mtrace
+            - /usr/bin/pcprofiledump
+            - /usr/bin/xtrace
+            - /usr/lib/*.o
+            - /usr/lib/libc_malloc_debug.so*
+
+    - "%(name)-32bit":
+        paths:
+            - /usr/lib/ld-linux.so.2
+
+    - "%(name)-32bit-devel":
+        paths:
+            - /usr/lib32/*.o
+            - /usr/lib32/libc_malloc_debug.so*

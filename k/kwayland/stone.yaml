@@ -1,0 +1,30 @@
+#
+# SPDX-FileCopyrightText: © 2020-2025 Serpent OS Developers
+#
+# SPDX-License-Identifier: MPL-2.0
+#
+name        : kwayland
+version     : 6.5.1
+release     : 9
+upstreams   :
+    - https://download.kde.org/stable/plasma/6.5.1/kwayland-6.5.1.tar.xz : 5622ee2517ec80e9dc60203e04b5adbabd0ceaddfcd282c44b8542644b808767
+homepage    : https://kde.org/plasma-desktop/
+license     :
+    - BSD-3-Clause
+    - LGPL-2.1-only
+summary     : Qt-style API to interact with wayland
+description : |
+    Qt-style API to interact with wayland
+builddeps   :
+    # Temporary, boulder doesn't handle build ordering resolution correctly when builddeps are added by macros, so add ECM manually
+    - cmake(ECM)
+    - cmake(PlasmaWaylandProtocols)
+    - cmake(Qt6CorePrivate)
+    - cmake(Qt6WaylandClient)
+    - pkgconfig(wayland-protocols)
+setup       : |
+    %cmake_kf6
+build       : |
+    %cmake_build
+install     : |
+    %cmake_install
